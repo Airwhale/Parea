@@ -23,11 +23,20 @@ npm run dev
 Useful scripts:
 
 - `npm run dev` starts the typed config loader and runs the canned Presidio-to-Chinatown stub loop.
+- `npm run dev:terminal` starts the Spectrum terminal provider for manual chat testing.
 - `npm run lint` runs ESLint.
 - `npm run typecheck` runs TypeScript without emitting files.
 - `npm run test` runs Vitest.
 - `npm run test:coverage` runs tests with coverage thresholds.
 - `npm run check` runs lint, typecheck, and tests.
+
+Manual Spectrum terminal smoke:
+
+```bash
+npm run dev:terminal
+```
+
+In the terminal chat, use `/start`, `/join`, `/vibe mellow`, `/move presidio`, `/move chinatown`, and `/status`. Plain text commands without the slash also work. A successful smoke produces the initial Presidio Stroll and then a Chinatown Snack Quest reroute after `/move chinatown`.
 
 ## Branch Plan
 

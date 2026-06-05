@@ -1,4 +1,9 @@
 import { createStubAdventureGen } from "./adventureGen.js";
+import {
+  DEMO_CHINATOWN_LOCATIONS,
+  DEMO_MEMBER_IDS,
+  DEMO_PRESIDIO_LOCATIONS,
+} from "./demoLocations.js";
 import { createConsoleDelivery, createRecordingDelivery } from "./delivery.js";
 import { createEngine } from "./engine.js";
 import { createStubMemory } from "./memory.js";
@@ -6,19 +11,6 @@ import { createStubStore } from "./store.js";
 import { createStubVenueSource } from "./venues.js";
 
 import type { Delivery, DeliveryRecord } from "./delivery.js";
-import type { MemberLocation } from "./schemas.js";
-
-const PRESIDIO_LOCATIONS: readonly MemberLocation[] = [
-  { lat: 37.8028, lng: -122.4487, userId: "user_ada" },
-  { lat: 37.8034, lng: -122.4492, userId: "user_grace" },
-  { lat: 37.8024, lng: -122.448, userId: "user_katherine" },
-];
-
-const CHINATOWN_LOCATIONS: readonly MemberLocation[] = [
-  { lat: 37.7953, lng: -122.4078, userId: "user_ada" },
-  { lat: 37.7958, lng: -122.4064, userId: "user_grace" },
-  { lat: 37.7948, lng: -122.4069, userId: "user_katherine" },
-];
 
 const stableRandom = (): number => 0.5;
 
@@ -57,14 +49,14 @@ export const runStubDemo = async ({
 
   await engine.startWander({
     groupId: "group_demo",
-    initialLocations: PRESIDIO_LOCATIONS,
+    initialLocations: DEMO_PRESIDIO_LOCATIONS,
     initiatorId: "user_ada",
-    memberIds: ["user_ada", "user_grace", "user_katherine"],
+    memberIds: DEMO_MEMBER_IDS,
     vibe: "mellow",
   });
   const rerouted = await engine.handleZoneExit({
     groupId: "group_demo",
-    locations: CHINATOWN_LOCATIONS,
+    locations: DEMO_CHINATOWN_LOCATIONS,
   });
 
   return {
