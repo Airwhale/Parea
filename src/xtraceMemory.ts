@@ -144,6 +144,11 @@ const recordToBelief = (groupId: string, record: XTraceMemoryRecord): Belief =>
     vibe: extractVibe(record.text),
   });
 
+const createdAtTimestamp = (record: XTraceMemoryRecord): number => {
+  const timestamp = Date.parse(record.created_at ?? "");
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+};
+
 const buildClient = (config: XTraceMemoryConfig): XTraceMemoryClient => {
   const options: MemoryClientOptions = {
     apiKey: config.apiKey,
@@ -159,10 +164,10 @@ const buildClient = (config: XTraceMemoryConfig): XTraceMemoryClient => {
 
 const seedMessage = ({ adventureTitle, groupId, vibe, zone }: SeedBeliefInput) =>
   [
-    `Parea Wander belief seed for group ${groupId}.`,
-    `The group currently fits a ${vibe} adventure named ${adventureTitle}.`,
-    `The noised public adventure zone is centered at ${zone.centerLat}, ${zone.centerLng} with radius ${zone.radiusM}m.`,
-    "Belief status is active with confidence 0.82.",
+    "Please remember this durable fact for Parea Wander:",
+    `${groupId} is a group that currently fits a ${vibe} adventure named ${adventureTitle} inside a ${zone.radiusM} meter zone.`,
+    "This is an active adventure-fit belief with confidence 0.82.",
+    `The noised public adventure zone center is ${zone.centerLat}, ${zone.centerLng}.`,
   ].join(" ");
 
 const contradictionMessage = (
@@ -170,11 +175,12 @@ const contradictionMessage = (
   rerouteVibe: Vibe,
 ) =>
   [
-    `Parea Wander contradiction for group ${groupId}.`,
+    "Please remember this corrected durable fact for Parea Wander:",
+    `${groupId} received a zone-exit contradiction.`,
     observation,
-    "Revise the prior active adventure-fit belief.",
+    "The previous adventure-fit belief is superseded.",
     `The group now fits a ${rerouteVibe} reroute.`,
-    "Preserve the old belief lineage as superseded rather than deleting it.",
+    "The revised belief confidence is 0.88.",
   ].join(" ");
 
 export const createXTraceMemory = (options: XTraceMemoryOptions): Memory => {
@@ -217,8 +223,14 @@ export const createXTraceMemory = (options: XTraceMemoryOptions): Memory => {
       });
 
       return result.data
+        .filter((record) => record.type === "fact")
+        .sort(
+          (left, right) => createdAtTimestamp(left) - createdAtTimestamp(right),
+        )
         .map((record) => recordToBelief(groupId, record))
-        .filter((belief) => belief.status === "active");
+        .filter(
+          (belief) => belief.status === "active" && belief.vibe !== undefined,
+        );
     },
     seedBelief: async (input) => {
       const summary = seedMessage(input);
