@@ -76,8 +76,37 @@ describe("createLogger", () => {
 
     expect(messages).toHaveLength(1);
     expect(JSON.parse(messages[0] ?? "{}")).toMatchObject({
+      issues: expect.any(Array),
       level: "error",
-      message: expect.stringContaining("Log validation failed"),
+      message: "Log validation failed",
+      phase: "logger",
+      runId: "run_test",
+      status: "failed",
+    });
+  });
+
+  it("does not throw when fields cannot be serialized", () => {
+    const messages: string[] = [];
+    const logger = createLogger({
+      runId: "run_test",
+      sink: {
+        debug: (message) => messages.push(message),
+        error: (message) => messages.push(message),
+        info: (message) => messages.push(message),
+        warn: (message) => messages.push(message),
+      },
+    });
+    const fields: Record<string, unknown> = {};
+    fields.self = fields;
+
+    expect(() => {
+      logger.info({ fields, phase: "boot", status: "info" });
+    }).not.toThrow();
+
+    expect(messages).toHaveLength(1);
+    expect(JSON.parse(messages[0] ?? "{}")).toMatchObject({
+      level: "error",
+      message: expect.stringContaining("Failed to serialize log event"),
       phase: "logger",
       runId: "run_test",
       status: "failed",

@@ -41,6 +41,21 @@ export type LoggerOptions = {
   sink?: LogSink;
 };
 
+const buildSerializationFailurePayload = (
+  error: unknown,
+  runId: string,
+): string =>
+  JSON.stringify({
+    level: "error",
+    message: `Failed to serialize log event: ${
+      error instanceof Error ? error.message : "unknown error"
+    }`,
+    phase: "logger",
+    runId,
+    status: "failed",
+    timestamp: new Date().toISOString(),
+  });
+
 export const createLogger = ({
   level = "info",
   runId = randomUUID(),
@@ -58,8 +73,9 @@ export const createLogger = ({
     if (!parsed.success) {
       sink.error(
         JSON.stringify({
+          issues: parsed.error.issues,
           level: "error",
-          message: `Log validation failed: ${parsed.error.message}`,
+          message: "Log validation failed",
           phase: "logger",
           runId,
           status: "failed",
@@ -69,13 +85,20 @@ export const createLogger = ({
       return;
     }
 
-    sink[eventLevel](
-      JSON.stringify({
+    try {
+      const payload = {
         ...parsed.data,
         level: eventLevel,
         timestamp: new Date().toISOString(),
-      }),
-    );
+      } satisfies LogEvent & {
+        level: Exclude<LogLevel, "silent">;
+        timestamp: string;
+      };
+
+      sink[eventLevel](JSON.stringify(payload));
+    } catch (error) {
+      sink.error(buildSerializationFailurePayload(error, runId));
+    }
   };
 
   return {

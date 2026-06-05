@@ -1,5 +1,3 @@
-import "dotenv/config";
-
 import { z } from "zod";
 
 export const APP_ROOT = process.cwd();

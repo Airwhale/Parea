@@ -9,12 +9,13 @@
     "npm": ">=10.0.0"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
     "dev": "tsx src/index.ts",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "check": "npm run lint && npm run typecheck && npm run test"
+    "check": "npm run lint && npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {
     "dotenv": "^17.4.2",
@@ -22,7 +23,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/node": "^25.9.1",
+    "@types/node": "^22.19.19",
     "@vitest/coverage-v8": "^4.1.8",
     "eslint": "^10.4.1",
     "tsx": "^4.22.4",

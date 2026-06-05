@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import { ConfigError, loadConfig } from "./config.js";
 import { createLogger } from "./logger.js";
 
@@ -29,6 +31,7 @@ try {
         message: error.message,
         phase: "config",
         status: "failed",
+        timestamp: new Date().toISOString(),
       }),
     );
     process.exitCode = 1;

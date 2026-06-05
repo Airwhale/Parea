@@ -32,6 +32,7 @@ export const BeatSchema = z.object({
 export type Beat = z.infer<typeof BeatSchema>;
 
 export const AdventureSchema = z.object({
+  // Demo adventures are intentionally three beats: opening, midpoint, and close.
   beats: z.array(BeatSchema).length(3),
   groupId: NonEmptyStringSchema,
   id: NonEmptyStringSchema,
