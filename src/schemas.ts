@@ -39,7 +39,13 @@ export const AdventureSchema = z.object({
   title: NonEmptyStringSchema,
   vibe: VibeSchema,
   zone: ZoneSchema,
-});
+}).refine(
+  (data) => data.beats.every((beat, index) => beat.order === index + 1),
+  {
+    message: "Beats must be ordered sequentially (1, 2, 3)",
+    path: ["beats"],
+  },
+);
 export type Adventure = z.infer<typeof AdventureSchema>;
 
 export const GroupSchema = z.object({

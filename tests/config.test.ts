@@ -38,6 +38,30 @@ describe("loadConfig", () => {
     });
   });
 
+  it("treats blank environment values as absent", () => {
+    const config = loadConfig({
+      APP_ENV: "",
+      BUTTERBASE_API_URL: "   ",
+      BUTTERBASE_APP_ID: "   ",
+      LOG_LEVEL: " ",
+      PORT: "",
+      ROCKETRIDE_URI: "",
+      SPECTRUM_PROVIDER: "",
+    });
+
+    expect(config).toMatchObject({
+      appEnv: "development",
+      butterbase: {
+        apiUrl: "https://api.butterbase.ai",
+      },
+      logLevel: "info",
+      port: 3000,
+      rocketrideUri: "http://localhost:5565",
+      spectrumProvider: "terminal",
+    });
+    expect(config.butterbase.appId).toBeUndefined();
+  });
+
   it("throws an actionable error for invalid values", () => {
     expect(() => {
       loadConfig({ PORT: "not-a-port" });

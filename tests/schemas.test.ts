@@ -46,6 +46,27 @@ describe("boundary schemas", () => {
     expect(parsed.beats).toHaveLength(3);
   });
 
+  it("rejects adventure beats that are not sequentially ordered", () => {
+    const result = AdventureSchema.safeParse({
+      beats: [
+        { order: 2, prompt: "Find a quiet bench.", venue },
+        { order: 1, prompt: "Take in the bay view.", venue },
+        { order: 3, prompt: "Share the favorite moment.", venue },
+      ],
+      groupId: "group_1",
+      id: "adv_1",
+      title: "Presidio Stroll",
+      vibe: "mellow",
+      zone: {
+        centerLat: 37.802,
+        centerLng: -122.448,
+        radiusM: 350,
+      },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
   it("rejects invalid coordinates before they cross a boundary", () => {
     const result = LocationUpdateSchema.safeParse({
       groupId: "group_1",

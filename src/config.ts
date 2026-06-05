@@ -3,7 +3,7 @@ import { z } from "zod";
 export const APP_ROOT = process.cwd();
 
 const emptyToUndefined = (value: unknown): unknown => {
-  if (value === "") {
+  if (typeof value === "string" && value.trim() === "") {
     return undefined;
   }
 
@@ -11,11 +11,12 @@ const emptyToUndefined = (value: unknown): unknown => {
 };
 
 const PortSchema = z.preprocess((value) => {
-  if (value === undefined || value === "") {
+  const normalized = emptyToUndefined(value);
+  if (normalized === undefined) {
     return undefined;
   }
 
-  return Number(value);
+  return Number(normalized);
 }, z.number().int().min(1).max(65_535).default(3000));
 
 const OptionalStringSchema = z.preprocess(
@@ -23,22 +24,32 @@ const OptionalStringSchema = z.preprocess(
   z.string().min(1).optional(),
 );
 
-const OptionalUrlSchema = z.preprocess(
-  emptyToUndefined,
-  z.string().url().optional(),
-);
-
 export const ConfigSchema = z.object({
-  appEnv: z.enum(["development", "test", "production"]).default("development"),
+  appEnv: z.preprocess(
+    emptyToUndefined,
+    z.enum(["development", "test", "production"]).default("development"),
+  ),
   butterbase: z.object({
     anonKey: OptionalStringSchema,
-    apiUrl: OptionalUrlSchema.default("https://api.butterbase.ai"),
+    apiUrl: z.preprocess(
+      emptyToUndefined,
+      z.string().url().default("https://api.butterbase.ai"),
+    ),
     appId: OptionalStringSchema,
   }),
-  logLevel: z.enum(["debug", "info", "warn", "error", "silent"]).default("info"),
+  logLevel: z.preprocess(
+    emptyToUndefined,
+    z.enum(["debug", "info", "warn", "error", "silent"]).default("info"),
+  ),
   port: PortSchema,
-  rocketrideUri: z.string().url().default("http://localhost:5565"),
-  spectrumProvider: z.enum(["terminal", "slack", "imessage"]).default("terminal"),
+  rocketrideUri: z.preprocess(
+    emptyToUndefined,
+    z.string().url().default("http://localhost:5565"),
+  ),
+  spectrumProvider: z.preprocess(
+    emptyToUndefined,
+    z.enum(["terminal", "slack", "imessage"]).default("terminal"),
+  ),
   xtrace: z.object({
     apiKey: OptionalStringSchema,
     orgId: OptionalStringSchema,

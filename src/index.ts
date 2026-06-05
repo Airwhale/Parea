@@ -36,6 +36,16 @@ try {
     );
     process.exitCode = 1;
   } else {
-    throw error;
+    console.error(
+      JSON.stringify({
+        level: "error",
+        message: error instanceof Error ? error.message : String(error),
+        phase: "boot",
+        stack: error instanceof Error ? error.stack : undefined,
+        status: "failed",
+        timestamp: new Date().toISOString(),
+      }),
+    );
+    process.exitCode = 1;
   }
 }
