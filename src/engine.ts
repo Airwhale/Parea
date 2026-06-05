@@ -51,6 +51,10 @@ export const createEngine = ({
       throw new Error(`No adventure exists for group ${groupId}.`);
     }
 
+    if (locations.length === 0) {
+      return false;
+    }
+
     const currentCentroid = centroid(locations);
     if (!isOutsideZone(currentCentroid, latestAdventure.zone)) {
       return false;
@@ -94,6 +98,10 @@ export const createEngine = ({
     memberIds,
     vibe,
   }) => {
+    if (initialLocations.length === 0) {
+      throw new Error("At least one initial location is required to start a wander.");
+    }
+
     const createdAt = clock().toISOString();
     await store.saveGroup({
       createdAt,

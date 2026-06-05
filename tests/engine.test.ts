@@ -80,6 +80,40 @@ describe("engine", () => {
     expect(delivery.records).toHaveLength(1);
   });
 
+  it("ignores empty location updates during zone checks", async () => {
+    const { delivery, engine } = createTestEngine();
+
+    await engine.startWander({
+      groupId: "group_test",
+      initialLocations: presidioLocations,
+      initiatorId: "user_ada",
+      memberIds: ["user_ada", "user_grace"],
+      vibe: "mellow",
+    });
+
+    await expect(
+      engine.handleZoneExit({
+        groupId: "group_test",
+        locations: [],
+      }),
+    ).resolves.toBe(false);
+    expect(delivery.records).toHaveLength(1);
+  });
+
+  it("rejects wander starts without any initial location", async () => {
+    const { engine } = createTestEngine();
+
+    await expect(
+      engine.startWander({
+        groupId: "group_test",
+        initialLocations: [],
+        initiatorId: "user_ada",
+        memberIds: ["user_ada", "user_grace"],
+        vibe: "mellow",
+      }),
+    ).rejects.toThrow("At least one initial location");
+  });
+
   it("revises memory and delivers a foodie reroute after zone exit", async () => {
     const { delivery, engine, memory, store } = createTestEngine();
 

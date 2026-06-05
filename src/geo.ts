@@ -15,6 +15,8 @@ export type NoiseOptions = {
 
 const degreesToRadians = (degrees: number): number => (degrees * Math.PI) / 180;
 
+const radiansToDegrees = (radians: number): number => (radians * 180) / Math.PI;
+
 const metersToLatitudeDegrees = (metersNorth: number): number =>
   metersNorth / METERS_PER_DEGREE_LAT;
 
@@ -35,17 +37,31 @@ export const centroid = (locations: readonly MemberLocation[]): Coordinate => {
     throw new Error("At least one location is required to compute a centroid.");
   }
 
-  const totals = locations.reduce(
-    (acc, location) => ({
-      lat: acc.lat + location.lat,
-      lng: acc.lng + location.lng,
-    }),
-    { lat: 0, lng: 0 },
-  );
+  let x = 0;
+  let y = 0;
+  let z = 0;
+
+  for (const location of locations) {
+    const lat = degreesToRadians(location.lat);
+    const lng = degreesToRadians(location.lng);
+
+    x += Math.cos(lat) * Math.cos(lng);
+    y += Math.cos(lat) * Math.sin(lng);
+    z += Math.sin(lat);
+  }
+
+  const total = locations.length;
+  x /= total;
+  y /= total;
+  z /= total;
+
+  const lng = Math.atan2(y, x);
+  const hypotenuse = Math.sqrt(x * x + y * y);
+  const lat = Math.atan2(z, hypotenuse);
 
   return {
-    lat: totals.lat / locations.length,
-    lng: totals.lng / locations.length,
+    lat: radiansToDegrees(lat),
+    lng: radiansToDegrees(lng),
   };
 };
 
@@ -71,9 +87,11 @@ export const haversineDistanceM = (
   const deltaLng = degreesToRadians(second.lng - first.lng);
   const firstLat = degreesToRadians(first.lat);
   const secondLat = degreesToRadians(second.lat);
-  const a =
+  const a = Math.min(
+    1,
     Math.sin(deltaLat / 2) ** 2 +
-    Math.cos(firstLat) * Math.cos(secondLat) * Math.sin(deltaLng / 2) ** 2;
+      Math.cos(firstLat) * Math.cos(secondLat) * Math.sin(deltaLng / 2) ** 2,
+  );
 
   return 2 * EARTH_RADIUS_M * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };

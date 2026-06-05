@@ -14,10 +14,20 @@ const locations = [
 
 describe("geo", () => {
   it("computes a member-location centroid", () => {
-    expect(centroid(locations)).toEqual({
-      lat: 37.803,
-      lng: -122.449,
+    expect(centroid(locations)).toMatchObject({
+      lat: expect.closeTo(37.803, 3),
+      lng: expect.closeTo(-122.449, 3),
     });
+  });
+
+  it("computes centroids across the antimeridian", () => {
+    const center = centroid([
+      { lat: 0, lng: 179, userId: "user_1" },
+      { lat: 0, lng: -179, userId: "user_2" },
+    ]);
+
+    expect(Math.abs(center.lng)).toBeGreaterThan(179);
+    expect(center.lat).toBeCloseTo(0);
   });
 
   it("adds configurable Gaussian noise to a centroid", () => {
@@ -33,6 +43,12 @@ describe("geo", () => {
 
   it("throws when no member locations are available", () => {
     expect(() => centroid([])).toThrow("At least one location");
+  });
+
+  it("returns a finite distance for antipodal points", () => {
+    expect(
+      haversineDistanceM({ lat: 0, lng: 0 }, { lat: 0, lng: 180 }),
+    ).toBeCloseTo(20_015_086, -3);
   });
 
   it("detects a location outside an adventure zone with hysteresis", () => {
