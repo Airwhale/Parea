@@ -13,8 +13,14 @@ describe("loadConfig", () => {
       appEnv: "development",
       logLevel: "info",
       port: 3000,
-      rocketrideUri: "http://localhost:5565",
+      rocketride: {
+        uri: "http://localhost:5565",
+      },
       spectrumProvider: "terminal",
+      venues: {
+        overpassApiUrl: "https://overpass-api.de/api/interpreter",
+        source: "stub",
+      },
     });
     expect(existsSync(join(APP_ROOT, "package.json"))).toBe(true);
   });
@@ -24,14 +30,27 @@ describe("loadConfig", () => {
       APP_ENV: "test",
       BUTTERBASE_API_URL: "https://api.butterbase.ai",
       LOG_LEVEL: "debug",
+      OVERPASS_API_URL: "https://overpass.example/api/interpreter",
       PORT: "4123",
+      ROCKETRIDE_ADVENTURE_PIPELINE: "pipelines/parea-adventure.pipe",
+      ROCKETRIDE_APIKEY: "rrk_example",
       ROCKETRIDE_URI: "http://localhost:5565",
       SPECTRUM_PROVIDER: "terminal",
+      VENUE_SOURCE: "overpass",
       XTRACE_API_KEY: "xtk_example",
       XTRACE_ORG_ID: "org_example",
     });
 
     expect(config.port).toBe(4123);
+    expect(config.rocketride).toEqual({
+      adventurePipelinePath: "pipelines/parea-adventure.pipe",
+      apiKey: "rrk_example",
+      uri: "http://localhost:5565",
+    });
+    expect(config.venues).toEqual({
+      overpassApiUrl: "https://overpass.example/api/interpreter",
+      source: "overpass",
+    });
     expect(config.xtrace).toEqual({
       apiKey: "xtk_example",
       apiUrl: "https://api.production.xtrace.ai",
@@ -46,8 +65,11 @@ describe("loadConfig", () => {
       BUTTERBASE_APP_ID: "   ",
       LOG_LEVEL: " ",
       PORT: "",
+      ROCKETRIDE_ADVENTURE_PIPELINE: " ",
+      ROCKETRIDE_APIKEY: " ",
       ROCKETRIDE_URI: "",
       SPECTRUM_PROVIDER: "",
+      VENUE_SOURCE: "",
     });
 
     expect(config).toMatchObject({
@@ -57,9 +79,16 @@ describe("loadConfig", () => {
       },
       logLevel: "info",
       port: 3000,
-      rocketrideUri: "http://localhost:5565",
+      rocketride: {
+        uri: "http://localhost:5565",
+      },
       spectrumProvider: "terminal",
+      venues: {
+        source: "stub",
+      },
     });
+    expect(config.rocketride.apiKey).toBeUndefined();
+    expect(config.rocketride.adventurePipelinePath).toBeUndefined();
     expect(config.xtrace.apiUrl).toBe("https://api.production.xtrace.ai");
     expect(config.butterbase.appId).toBeUndefined();
   });

@@ -10,6 +10,7 @@ import { createStubMemory } from "./memory.js";
 import { createStubStore } from "./store.js";
 import { createStubVenueSource } from "./venues.js";
 
+import type { AdventureGen } from "./adventureGen.js";
 import type { Delivery, DeliveryRecord } from "./delivery.js";
 import type { Memory } from "./memory.js";
 
@@ -21,9 +22,11 @@ export type StubDemoResult = {
 };
 
 export const runStubDemo = async ({
+  adventureGen = createStubAdventureGen(createStubVenueSource()),
   memory = createStubMemory(),
   printToConsole = false,
 }: {
+  adventureGen?: AdventureGen;
   memory?: Memory;
   printToConsole?: boolean;
 } = {}): Promise<StubDemoResult> => {
@@ -38,7 +41,6 @@ export const runStubDemo = async ({
     },
   };
   const store = createStubStore();
-  const adventureGen = createStubAdventureGen(createStubVenueSource());
   const engine = createEngine({
     adventureGen,
     clock: () => new Date("2026-06-05T19:00:00.000Z"),
