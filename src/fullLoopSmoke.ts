@@ -9,42 +9,35 @@ const main = async (): Promise<void> => {
   const config = loadConfig();
   const logger = createLogger({ level: config.logLevel });
   const runtime = createRuntimeDeps(config);
-  const xtraceConfigured =
-    config.xtrace.apiKey !== undefined && config.xtrace.orgId !== undefined;
-
-  logger.info({
-    fields: {
-      appEnv: config.appEnv,
-      port: config.port,
-      butterbaseConfigured: config.butterbase.appId !== undefined,
-      rocketrideConfigured:
-        config.rocketride.apiKey !== undefined &&
-        config.rocketride.adventurePipelinePath !== undefined,
-      spectrumProvider: config.spectrumProvider,
-      venueSource: config.venues.source,
-      xtraceConfigured,
-    },
-    message: "Parea Wander bootstrap ready.",
-    phase: "boot",
-    schemaId: "app.config.v1",
-    status: "succeeded",
-  });
-
   const result = await runStubDemo({
     adventureGen: runtime.adventureGen,
+    groupId: `group_full_loop_${Date.now()}`,
     memory: runtime.memory,
     printToConsole: true,
     store: runtime.store,
   });
+
   logger.info({
     fields: {
+      butterbaseConfigured: config.butterbase.appId !== undefined,
+      deliveryCount: result.deliveryRecords.length,
       rerouted: result.rerouted,
+      rocketrideConfigured:
+        config.rocketride.apiKey !== undefined &&
+        config.rocketride.adventurePipelinePath !== undefined,
+      venueSource: config.venues.source,
+      xtraceConfigured:
+        config.xtrace.apiKey !== undefined && config.xtrace.orgId !== undefined,
     },
-    message: "Stub Wander loop completed.",
-    phase: "stub_demo",
-    schemaId: "app.stub_demo.v1",
-    status: "succeeded",
+    message: "Full Parea Wander loop smoke completed.",
+    phase: "full_loop_smoke",
+    schemaId: "app.full_loop_smoke.v1",
+    status: result.rerouted ? "succeeded" : "failed",
   });
+
+  if (!result.rerouted || result.deliveryRecords.length < 2) {
+    throw new Error("Full loop smoke did not produce a reroute.");
+  }
 };
 
 try {
@@ -61,18 +54,17 @@ try {
         timestamp: new Date().toISOString(),
       }),
     );
-    process.exitCode = 1;
   } else {
     console.error(
       JSON.stringify({
         level: "error",
         message: error instanceof Error ? error.message : String(error),
-        phase: "boot",
-        stack: error instanceof Error ? error.stack : undefined,
+        phase: "full_loop_smoke",
         status: "failed",
         timestamp: new Date().toISOString(),
       }),
     );
-    process.exitCode = 1;
   }
+
+  process.exitCode = 1;
 }

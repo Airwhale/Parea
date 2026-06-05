@@ -230,7 +230,7 @@ describe("createXTraceMemory", () => {
       }),
     ).resolves.toEqual({
       groupId: "group_test",
-      summary: "Group group_test now fits a foodie reroute.",
+      summary: expect.stringContaining("foodie reroute"),
       xtraceId: "mem_revised",
     });
 

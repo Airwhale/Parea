@@ -4,7 +4,7 @@ import { centroid, isOutsideZone, noisedCentroid } from "./geo.js";
 import type { AdventureGen } from "./adventureGen.js";
 import type { Delivery } from "./delivery.js";
 import type { Memory } from "./memory.js";
-import type { MemberLocation, Vibe } from "./schemas.js";
+import type { Belief, MemberLocation, Vibe } from "./schemas.js";
 import type { Store } from "./store.js";
 
 export type StartWanderInput = {
@@ -34,6 +34,30 @@ export type Engine = {
   handleZoneExit: (input: ZoneExitInput) => Promise<boolean>;
   startWander: (input: StartWanderInput) => Promise<void>;
 };
+
+const VIBES = ["mellow", "foodie", "cultural", "active"] as const;
+
+const vibeFromText = (text: string): Vibe | undefined => {
+  const explicitReroute = text.match(
+    /\bnow fits a (mellow|foodie|cultural|active) reroute\b/iu,
+  );
+  const rerouteVibe = explicitReroute?.[1];
+  if (rerouteVibe !== undefined) {
+    return rerouteVibe as Vibe;
+  }
+
+  return VIBES.find((vibe) => new RegExp(`\\b${vibe}\\b`, "iu").test(text));
+};
+
+const isRevisionBelief = (belief: Belief): boolean =>
+  /\b(contradiction|reroute|superseded|zone-exit|left the)\b/iu.test(
+    belief.summary,
+  );
+
+const selectRevisionBelief = (
+  beliefs: readonly Belief[],
+): Belief | undefined =>
+  [...beliefs].reverse().find(isRevisionBelief);
 
 export const createEngine = ({
   adventureGen,
@@ -67,16 +91,27 @@ export const createEngine = ({
     await store.saveBeliefRef(beliefRef);
 
     const currentBeliefs = await memory.current(groupId);
-    const revisedBelief = currentBeliefs.at(-1);
-    const rerouteVibe = revisedBelief?.vibe ?? latestAdventure.vibe;
+    const revisedBelief = selectRevisionBelief(currentBeliefs);
+    const latestBelief = currentBeliefs.at(-1);
+    const contradictionVibe = vibeFromText(beliefRef.summary);
+    const rerouteVibe =
+      (contradictionVibe !== undefined &&
+      contradictionVibe !== latestAdventure.vibe
+        ? contradictionVibe
+        : revisedBelief?.vibe) ??
+      contradictionVibe ??
+      latestBelief?.vibe ??
+      latestAdventure.vibe;
+    const beliefSummary =
+      contradictionVibe !== undefined && contradictionVibe !== latestAdventure.vibe
+        ? beliefRef.summary
+        : revisedBelief?.summary ?? beliefRef.summary ?? latestBelief?.summary;
     const publicCentroid = noisedCentroid(locations, {
       random,
       sigmaM: noiseSigmaM,
     });
     const adventure = await adventureGen.generate({
-      ...(revisedBelief === undefined
-        ? {}
-        : { belief: revisedBelief.summary }),
+      belief: beliefSummary,
       groupId,
       lat: publicCentroid.lat,
       lng: publicCentroid.lng,

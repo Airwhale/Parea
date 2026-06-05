@@ -114,12 +114,13 @@ const beliefRefFromJob = (
   groupId: string,
   job: IngestJob,
   fallbackSummary: string,
+  preferFallbackSummary = false,
 ): BeliefRef => {
   const ref = jobMemoryRefs(job).at(0);
 
   return {
     groupId,
-    summary: ref?.text ?? fallbackSummary,
+    summary: preferFallbackSummary ? fallbackSummary : ref?.text ?? fallbackSummary,
     xtraceId: ref?.id ?? job.id,
   };
 };
@@ -219,7 +220,7 @@ export const createXTraceMemory = (options: XTraceMemoryOptions): Memory => {
     contradict: async (input) => {
       const summary = contradictionMessage(input, config.rerouteVibe);
       const job = await ingest(input.groupId, summary);
-      return beliefRefFromJob(input.groupId, job, summary);
+      return beliefRefFromJob(input.groupId, job, summary, true);
     },
     current: async (groupId) => {
       const result = await client.memories.search({

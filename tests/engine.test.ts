@@ -178,6 +178,60 @@ describe("engine", () => {
     );
   });
 
+  it("uses the contradiction ref when read-back returns a stale belief", async () => {
+    const delivery = createRecordingDelivery();
+    const store = createStubStore();
+    const engine = createEngine({
+      adventureGen: createStubAdventureGen(createStubVenueSource()),
+      delivery,
+      memory: {
+        contradict: async () => ({
+          groupId: "group_stale",
+          summary:
+            "Group left the Mellow San Francisco Stroll zone. The group now fits a foodie reroute.",
+          xtraceId: "belief_foodie",
+        }),
+        current: async () => [
+          {
+            confidence: 0.82,
+            groupId: "group_stale",
+            id: "belief_mellow",
+            status: "active" as const,
+            summary: "Group group_stale fits a mellow adventure.",
+            vibe: "mellow" as const,
+          },
+        ],
+        seedBelief: async () => ({
+          groupId: "group_stale",
+          summary: "Group group_stale fits a mellow adventure.",
+          xtraceId: "belief_seed",
+        }),
+      },
+      noiseSigmaM: 0,
+      random: () => 0.5,
+      store,
+    });
+
+    await engine.startWander({
+      groupId: "group_stale",
+      initialLocations: presidioLocations,
+      initiatorId: "user_ada",
+      memberIds: ["user_ada", "user_grace"],
+      vibe: "mellow",
+    });
+    await engine.handleZoneExit({
+      groupId: "group_stale",
+      locations: chinatownLocations,
+    });
+
+    await expect(store.getLatestAdventure("group_stale")).resolves.toMatchObject(
+      {
+        title: "Chinatown Snack Quest",
+        vibe: "foodie",
+      },
+    );
+  });
+
   it("runs the full canned demo loop", async () => {
     await expect(runStubDemo()).resolves.toMatchObject({
       deliveryRecords: expect.arrayContaining([

@@ -1,0 +1,61 @@
+{
+  "schema": {
+    "tables": {
+      "parea_groups": {
+        "columns": {
+          "created_at": { "nullable": false, "type": "timestamptz" },
+          "id": { "nullable": false, "primary": true, "type": "text" },
+          "initiator_id": { "nullable": false, "type": "text" },
+          "vibe": { "nullable": true, "type": "text" }
+        }
+      },
+      "parea_memberships": {
+        "columns": {
+          "group_id": { "nullable": false, "type": "text" },
+          "joined_at": { "nullable": false, "type": "timestamptz" },
+          "user_id": { "nullable": false, "type": "text" }
+        },
+        "indexes": [
+          {
+            "columns": ["group_id", "user_id"],
+            "name": "parea_memberships_group_user_idx",
+            "unique": true
+          }
+        ]
+      },
+      "parea_adventures": {
+        "columns": {
+          "beats": { "nullable": false, "type": "jsonb" },
+          "created_at": { "nullable": false, "type": "timestamptz" },
+          "group_id": { "nullable": false, "type": "text" },
+          "id": { "nullable": false, "primary": true, "type": "text" },
+          "title": { "nullable": false, "type": "text" },
+          "vibe": { "nullable": false, "type": "text" },
+          "zone": { "nullable": false, "type": "jsonb" }
+        },
+        "indexes": [
+          {
+            "columns": ["group_id", "created_at"],
+            "name": "parea_adventures_group_created_idx",
+            "unique": false
+          }
+        ]
+      },
+      "parea_belief_refs": {
+        "columns": {
+          "created_at": { "nullable": false, "type": "timestamptz" },
+          "group_id": { "nullable": false, "type": "text" },
+          "summary": { "nullable": false, "type": "text" },
+          "xtrace_id": { "nullable": false, "primary": true, "type": "text" }
+        },
+        "indexes": [
+          {
+            "columns": ["group_id", "created_at"],
+            "name": "parea_belief_refs_group_created_idx",
+            "unique": false
+          }
+        ]
+      }
+    }
+  }
+}

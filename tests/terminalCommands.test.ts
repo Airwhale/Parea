@@ -34,6 +34,19 @@ describe("terminal commands", () => {
     });
   });
 
+  it("parses judge-friendly natural language phrases", () => {
+    expect(parseTerminalCommand("we want something mellow")).toEqual({
+      kind: "start",
+      vibe: "mellow",
+    });
+    expect(parseTerminalCommand("I'm in")).toEqual({ kind: "join" });
+    expect(parseTerminalCommand("we moved to Chinatown")).toEqual({
+      kind: "move",
+      target: "chinatown",
+    });
+    expect(parseTerminalCommand("where are we?")).toEqual({ kind: "status" });
+  });
+
   it("returns actionable reasons for invalid commands", () => {
     expect(parseTerminalCommand("vibe loud")).toMatchObject({
       kind: "unknown",

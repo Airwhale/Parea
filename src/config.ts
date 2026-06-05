@@ -54,6 +54,16 @@ export const ConfigSchema = z.object({
     emptyToUndefined,
     z.enum(["terminal", "slack", "imessage"]).default("terminal"),
   ),
+  spectrum: z.object({
+    projectId: OptionalStringSchema,
+    projectSecret: OptionalStringSchema,
+    slack: z.object({
+      botToken: OptionalStringSchema,
+      channel: OptionalStringSchema,
+      endpoint: OptionalStringSchema,
+      teamId: OptionalStringSchema,
+    }),
+  }),
   venues: z.object({
     overpassApiUrl: z.preprocess(
       emptyToUndefined,
@@ -109,6 +119,16 @@ export const loadConfig = (
       uri: env.ROCKETRIDE_URI,
     },
     spectrumProvider: env.SPECTRUM_PROVIDER,
+    spectrum: {
+      projectId: env.SPECTRUM_PROJECT_ID,
+      projectSecret: env.SPECTRUM_PROJECT_SECRET,
+      slack: {
+        botToken: env.SLACK_BOT_TOKEN,
+        channel: env.SLACK_CHANNEL,
+        endpoint: env.SPECTRUM_SLACK_ENDPOINT,
+        teamId: env.SLACK_TEAM_ID,
+      },
+    },
     venues: {
       overpassApiUrl: env.OVERPASS_API_URL,
       source: env.VENUE_SOURCE,

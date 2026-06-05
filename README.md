@@ -54,6 +54,33 @@ For RocketRide local mode, the VS Code extension may choose a dynamic port. If i
 $env:ROCKETRIDE_URI='http://localhost:61709'
 ```
 
+## Judge Demo
+
+Use [JUDGES_DEMO.md](JUDGES_DEMO.md) as the live runbook. Judges communicate with Parea by typing into a Spectrum chat provider:
+
+- Terminal provider for the reliable local demo.
+- Slack provider when Slack credentials are ready.
+
+Start the judge-facing chat demo:
+
+```powershell
+$env:SPECTRUM_PROVIDER='terminal'
+$env:VENUE_SOURCE='overpass'
+$env:ROCKETRIDE_URI='http://localhost:61709'
+npm run judges:demo
+```
+
+Then type the judge-friendly script:
+
+```text
+I am in
+we want something mellow
+we moved to Chinatown
+where are we?
+```
+
+The slash command equivalents still work: `/join`, `/vibe mellow`, `/move chinatown`, and `/status`.
+
 ## Demo Commands
 
 Run the automated full-loop smoke:
@@ -89,6 +116,7 @@ To run Slack, set `SPECTRUM_PROVIDER=slack`. Either set `SPECTRUM_PROJECT_ID` an
 
 - `npm run dev` runs the canned full loop with configured integrations and console delivery.
 - `npm run dev:chat` starts the configured Spectrum provider, terminal by default.
+- `npm run judges:demo` starts the judge-facing Spectrum chat demo.
 - `npm run full-loop:smoke` runs the reproducible Presidio to Chinatown reroute path.
 - `npm run adventure:smoke` smoke-tests venue-backed adventure generation.
 - `npm run xtrace:smoke` smoke-tests XTrace seed, contradiction, and read-back.

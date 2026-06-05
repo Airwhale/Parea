@@ -11,7 +11,10 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "dev": "tsx src/index.ts",
+    "dev:chat": "tsx src/spectrumApp.ts",
     "dev:terminal": "tsx src/spectrumTerminal.ts",
+    "judges:demo": "tsx src/spectrumApp.ts",
+    "full-loop:smoke": "tsx src/fullLoopSmoke.ts",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -21,6 +24,7 @@
     "xtrace:smoke": "tsx src/xtraceSmoke.ts"
   },
   "dependencies": {
+    "@butterbase/sdk": "^2.4.0",
     "@xtraceai/memory": "^0.2.1",
     "dotenv": "^17.4.2",
     "rocketride": "^1.2.0",
