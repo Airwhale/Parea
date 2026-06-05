@@ -11,6 +11,7 @@ import { createStubStore } from "./store.js";
 import { createStubVenueSource } from "./venues.js";
 
 import type { Delivery, DeliveryRecord } from "./delivery.js";
+import type { Memory } from "./memory.js";
 
 const stableRandom = (): number => 0.5;
 
@@ -20,8 +21,10 @@ export type StubDemoResult = {
 };
 
 export const runStubDemo = async ({
+  memory = createStubMemory(),
   printToConsole = false,
 }: {
+  memory?: Memory;
   printToConsole?: boolean;
 } = {}): Promise<StubDemoResult> => {
   const recordingDelivery = createRecordingDelivery();
@@ -35,7 +38,6 @@ export const runStubDemo = async ({
     },
   };
   const store = createStubStore();
-  const memory = createStubMemory();
   const adventureGen = createStubAdventureGen(createStubVenueSource());
   const engine = createEngine({
     adventureGen,

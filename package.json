@@ -16,9 +16,11 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "check": "npm run lint && npm run typecheck && npm run test && npm run build"
+    "check": "npm run lint && npm run typecheck && npm run test && npm run build",
+    "xtrace:smoke": "tsx src/xtraceSmoke.ts"
   },
   "dependencies": {
+    "@xtraceai/memory": "^0.2.1",
     "dotenv": "^17.4.2",
     "spectrum-ts": "^1.18.0",
     "zod": "^4.4.3"

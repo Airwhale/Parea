@@ -52,6 +52,10 @@ export const ConfigSchema = z.object({
   ),
   xtrace: z.object({
     apiKey: OptionalStringSchema,
+    apiUrl: z.preprocess(
+      emptyToUndefined,
+      z.string().url().default("https://api.production.xtrace.ai"),
+    ),
     orgId: OptionalStringSchema,
   }),
 });
@@ -89,6 +93,7 @@ export const loadConfig = (
     spectrumProvider: env.SPECTRUM_PROVIDER,
     xtrace: {
       apiKey: env.XTRACE_API_KEY,
+      apiUrl: env.XTRACE_API_URL,
       orgId: env.XTRACE_ORG_ID,
     },
   });
