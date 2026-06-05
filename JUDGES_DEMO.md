@@ -2,6 +2,8 @@
 
 This runbook shows how judges communicate with Parea and what to expect during the live demo.
 
+Butterbase-hosted project page: [https://parea-wander.butterbase.dev](https://parea-wander.butterbase.dev)
+
 ## What Judges See
 
 Parea is a chat-first group adventure agent. Judges type messages into a Spectrum chat provider. Parea replies in that same conversation with the current Wander, map link, and reroute.

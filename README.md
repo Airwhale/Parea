@@ -61,6 +61,8 @@ Use [JUDGES_DEMO.md](JUDGES_DEMO.md) as the live runbook. Judges communicate wit
 - Terminal provider for the reliable local demo.
 - Slack provider when Slack credentials are ready.
 
+Butterbase-hosted project page: [https://parea-wander.butterbase.dev](https://parea-wander.butterbase.dev)
+
 Start the judge-facing chat demo:
 
 ```powershell
