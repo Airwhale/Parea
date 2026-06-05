@@ -11,6 +11,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "dev": "tsx src/index.ts",
+    "dev:terminal": "tsx src/spectrumTerminal.ts",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -19,6 +20,7 @@
   },
   "dependencies": {
     "dotenv": "^17.4.2",
+    "spectrum-ts": "^1.18.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
