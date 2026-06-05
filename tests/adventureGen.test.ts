@@ -50,18 +50,19 @@ describe("createVenueBackedAdventureGen", () => {
       title: "Chinatown Snack Quest",
       vibe: "foodie",
     });
+    expect(searches).toHaveLength(1);
     expect(searches[0]).toMatchObject({
       openNow: true,
-      radiusM: 900,
+      radiusM: 2_500,
     });
   });
 
-  it("widens the radius before falling back to another vibe", async () => {
+  it("uses the maximum radius before falling back to another vibe", async () => {
     const searches: VenueSearch[] = [];
     const source: VenueSource = {
       search: async (search) => {
         searches.push(search);
-        if (search.radiusM < 1_500) {
+        if (search.categories.includes("museum")) {
           return [];
         }
 
@@ -84,10 +85,9 @@ describe("createVenueBackedAdventureGen", () => {
         vibe: "cultural",
       }),
     ).resolves.toMatchObject({
-      title: "North Beach Story Walk",
-      vibe: "cultural",
+      title: "Chinatown Snack Quest",
+      vibe: "foodie",
     });
-    expect(searches.map((search) => search.radiusM)).toEqual([900, 1_500]);
+    expect(searches.map((search) => search.radiusM)).toEqual([1_500, 1_500]);
   });
 });
-

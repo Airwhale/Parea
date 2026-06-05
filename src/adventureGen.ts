@@ -76,23 +76,23 @@ const findThreeVenues = async ({
   searchRadiiM: readonly number[];
   venueSource: VenueSource;
 }): Promise<{ selectedVibe: Vibe; venues: readonly [Venue, Venue, Venue] }> => {
-  for (const candidateVibe of orderedVibes(vibe)) {
-    for (const radiusM of searchRadiiM) {
-      const venues = await venueSource.search({
-        categories: VIBE_QUERIES[candidateVibe],
-        lat,
-        lng,
-        openNow: true,
-        radiusM,
-      });
-      const selected = venues.slice(0, 3);
+  const maxRadiusM = searchRadiiM[searchRadiiM.length - 1] ?? 2_500;
 
-      if (selected.length === 3) {
-        return {
-          selectedVibe: candidateVibe,
-          venues: selected as [Venue, Venue, Venue],
-        };
-      }
+  for (const candidateVibe of orderedVibes(vibe)) {
+    const venues = await venueSource.search({
+      categories: VIBE_QUERIES[candidateVibe],
+      lat,
+      lng,
+      openNow: true,
+      radiusM: maxRadiusM,
+    });
+    const selected = venues.slice(0, 3);
+
+    if (selected.length === 3) {
+      return {
+        selectedVibe: candidateVibe,
+        venues: selected as [Venue, Venue, Venue],
+      };
     }
   }
 

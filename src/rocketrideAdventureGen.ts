@@ -143,17 +143,14 @@ const replaceTemplateVariables = (
   variables: z.infer<typeof PromptVariablesSchema>,
 ): string => {
   const validated = PromptVariablesSchema.parse(variables);
-  const rendered = Object.entries(validated).reduce(
-    (current, [key, value]) => current.replaceAll(`{{${key}}}`, value),
-    template,
-  );
-  const leftover = rendered.match(/\{\{[A-Za-z0-9_]+\}\}/u);
 
-  if (leftover !== null) {
-    throw new Error(`Unknown adventure prompt variable ${leftover[0]}.`);
-  }
+  return template.replace(/\{\{([A-Za-z0-9_]+)\}\}/gu, (match, key) => {
+    if (Object.hasOwn(validated, key)) {
+      return validated[key as keyof typeof validated];
+    }
 
-  return rendered;
+    throw new Error(`Unknown adventure prompt variable ${match}.`);
+  });
 };
 
 export const renderAdventurePrompt = async ({

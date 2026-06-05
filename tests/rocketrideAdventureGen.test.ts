@@ -81,6 +81,20 @@ describe("renderAdventurePrompt", () => {
     expect(prompt).toContain("Good Mong Kok Bakery");
     expect(prompt).not.toMatch(/\{\{[A-Za-z0-9_]+\}\}/u);
   });
+
+  it("does not reprocess template syntax inside replacement values", async () => {
+    const prompt = await renderAdventurePrompt({
+      input: {
+        ...input,
+        belief: "try the literal {{groupId}} marker",
+      },
+      venues,
+    });
+
+    expect(prompt).toContain(
+      "current belief: try the literal {{groupId}} marker",
+    );
+  });
 });
 
 describe("parseRocketRideAdventureResult", () => {
