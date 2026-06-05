@@ -16,6 +16,9 @@ describe("loadConfig", () => {
       rocketride: {
         uri: "http://localhost:5565",
       },
+      spectrum: {
+        slack: {},
+      },
       spectrumProvider: "terminal",
       venues: {
         overpassApiUrl: "https://overpass-api.de/api/interpreter",
@@ -35,6 +38,11 @@ describe("loadConfig", () => {
       ROCKETRIDE_ADVENTURE_PIPELINE: "pipelines/parea-adventure.pipe",
       ROCKETRIDE_APIKEY: "rrk_example",
       ROCKETRIDE_URI: "http://localhost:5565",
+      SLACK_BOT_TOKEN: "xoxb-example",
+      SLACK_CHANNEL: "C123",
+      SLACK_TEAM_ID: "T123",
+      SPECTRUM_PROJECT_ID: "project_example",
+      SPECTRUM_PROJECT_SECRET: "secret_example",
       SPECTRUM_PROVIDER: "terminal",
       VENUE_SOURCE: "overpass",
       XTRACE_API_KEY: "xtk_example",
@@ -50,6 +58,16 @@ describe("loadConfig", () => {
     expect(config.venues).toEqual({
       overpassApiUrl: "https://overpass.example/api/interpreter",
       source: "overpass",
+    });
+    expect(config.spectrum).toEqual({
+      projectId: "project_example",
+      projectSecret: "secret_example",
+      slack: {
+        botToken: "xoxb-example",
+        channel: "C123",
+        endpoint: undefined,
+        teamId: "T123",
+      },
     });
     expect(config.xtrace).toEqual({
       apiKey: "xtk_example",
@@ -69,6 +87,8 @@ describe("loadConfig", () => {
       ROCKETRIDE_APIKEY: " ",
       ROCKETRIDE_URI: "",
       SPECTRUM_PROVIDER: "",
+      SPECTRUM_PROJECT_ID: "",
+      SPECTRUM_PROJECT_SECRET: "",
       VENUE_SOURCE: "",
     });
 
@@ -89,6 +109,9 @@ describe("loadConfig", () => {
     });
     expect(config.rocketride.apiKey).toBeUndefined();
     expect(config.rocketride.adventurePipelinePath).toBeUndefined();
+    expect(config.spectrum.projectId).toBeUndefined();
+    expect(config.spectrum.projectSecret).toBeUndefined();
+    expect(config.spectrum.slack.botToken).toBeUndefined();
     expect(config.xtrace.apiUrl).toBe("https://api.production.xtrace.ai");
     expect(config.butterbase.appId).toBeUndefined();
   });

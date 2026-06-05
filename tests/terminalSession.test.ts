@@ -64,6 +64,44 @@ describe("terminal session controller", () => {
     ]);
   });
 
+  it("runs the judge demo with natural language phrases", async () => {
+    const controller = createTerminalSessionController();
+
+    await expect(
+      controller.handleText(input("I am in", "user_grace")),
+    ).resolves.toEqual([
+      {
+        body: "Joined this terminal Wander. Members: 1.",
+      },
+    ]);
+
+    const started = await controller.handleText(
+      input("we want something mellow"),
+    );
+    expect(started).toHaveLength(1);
+    expect(started[0]).toMatchObject({
+      body: expect.stringContaining("Your Wander is ready: Presidio Stroll"),
+      title: "Presidio Stroll",
+    });
+
+    const rerouted = await controller.handleText(
+      input("we moved to Chinatown"),
+    );
+    expect(rerouted).toHaveLength(1);
+    expect(rerouted[0]).toMatchObject({
+      body: expect.stringContaining("Reroute: Chinatown Snack Quest"),
+      title: "Chinatown Snack Quest",
+    });
+
+    await expect(controller.handleText(input("where are we?"))).resolves.toEqual(
+      [
+        {
+          body: "Active Wander: Chinatown Snack Quest. Members: 2.",
+        },
+      ],
+    );
+  });
+
   it("rejects movement before a Wander starts", async () => {
     const controller = createTerminalSessionController();
 

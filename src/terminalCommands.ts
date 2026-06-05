@@ -87,8 +87,53 @@ const moveCommand = (argument: string | undefined): TerminalCommand => {
   return { kind: "move", target };
 };
 
+const parseNaturalLanguageCommand = (text: string): TerminalCommand => {
+  const normalized = text.toLowerCase();
+  const vibe = VibeSchema.options.find((candidate) =>
+    new RegExp(`\\b${candidate}\\b`, "iu").test(normalized),
+  );
+
+  if (/\b(help|commands?|what can i say)\b/iu.test(normalized)) {
+    return { kind: "help" };
+  }
+
+  if (/\b(status|where are we|what is active|what's active)\b/iu.test(normalized)) {
+    return { kind: "status" };
+  }
+
+  if (
+    /\b(join|i am in|i'm in|add me|count me in|invite me)\b/iu.test(
+      normalized,
+    )
+  ) {
+    return { kind: "join" };
+  }
+
+  if (/\b(chinatown|outside)\b/iu.test(normalized)) {
+    return { kind: "move", target: "chinatown" };
+  }
+
+  if (/\b(presidio|inside)\b/iu.test(normalized)) {
+    return { kind: "move", target: "presidio" };
+  }
+
+  if (vibe !== undefined) {
+    return { kind: "start", vibe };
+  }
+
+  if (/\b(start|begin|wander|let's go|lets go)\b/iu.test(normalized)) {
+    return { kind: "start" };
+  }
+
+  return {
+    kind: "unknown",
+    reason: "Unknown command. Use help to see the terminal commands.",
+  };
+};
+
 export const parseTerminalCommand = (text: string): TerminalCommand => {
-  const [rawKeyword, rawArgument] = text.trim().toLowerCase().split(/\s+/);
+  const trimmed = text.trim();
+  const [rawKeyword, rawArgument] = trimmed.toLowerCase().split(/\s+/);
   const keyword = rawKeyword?.replace(/^\//, "");
 
   switch (keyword) {
@@ -105,9 +150,6 @@ export const parseTerminalCommand = (text: string): TerminalCommand => {
     case "vibe":
       return vibeCommand(rawArgument);
     default:
-      return {
-        kind: "unknown",
-        reason: "Unknown command. Use help to see the terminal commands.",
-      };
+      return parseNaturalLanguageCommand(trimmed);
   }
 };

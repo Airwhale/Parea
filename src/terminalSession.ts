@@ -13,9 +13,11 @@ import { createStubVenueSource } from "./venues.js";
 
 import type { DeliveryRecord } from "./delivery.js";
 import type { Engine } from "./engine.js";
+import type { Memory } from "./memory.js";
 import type { OutMessage, Vibe } from "./schemas.js";
 import type { Store } from "./store.js";
 import type { MoveTarget, TerminalTextInput } from "./terminalCommands.js";
+import type { AdventureGen } from "./adventureGen.js";
 
 type RecordingDelivery = ReturnType<typeof createRecordingDelivery>;
 
@@ -33,6 +35,15 @@ export type TerminalSessionController = {
   handleText: (input: TerminalTextInput) => Promise<readonly OutMessage[]>;
 };
 
+export type TerminalSessionControllerOptions = {
+  adventureGen?: AdventureGen;
+  clock?: () => Date;
+  memory?: Memory;
+  noiseSigmaM?: number;
+  random?: () => number;
+  store?: Store;
+};
+
 const stableRandom = (): number => 0.5;
 
 const terminalMessage = (body: string): OutMessage =>
@@ -47,6 +58,12 @@ export const TERMINAL_HELP_MESSAGE = [
   "/move chinatown - simulate leaving the current zone",
   "/move presidio - simulate staying near the starting zone",
   "/status - show the current terminal session state",
+  "",
+  "Judge-friendly phrases also work:",
+  "we want something mellow",
+  "I am in",
+  "we moved to Chinatown",
+  "where are we?",
 ].join("\n");
 
 const targetToDemoLocation = (target: MoveTarget): "chinatown" | "presidio" => {
@@ -68,16 +85,25 @@ const groupIdForSpace = (spaceId: string): string => {
   return `terminal_${normalized}`;
 };
 
-const createSession = (spaceId: string): TerminalGroupSession => {
+const createSession = (
+  spaceId: string,
+  {
+    adventureGen = createStubAdventureGen(createStubVenueSource()),
+    clock = () => new Date("2026-06-05T19:00:00.000Z"),
+    memory = createStubMemory(),
+    noiseSigmaM = 0,
+    random = stableRandom,
+    store = createStubStore(),
+  }: TerminalSessionControllerOptions,
+): TerminalGroupSession => {
   const delivery = createRecordingDelivery();
-  const store = createStubStore();
   const engine = createEngine({
-    adventureGen: createStubAdventureGen(createStubVenueSource()),
-    clock: () => new Date("2026-06-05T19:00:00.000Z"),
+    adventureGen,
+    clock,
     delivery,
-    memory: createStubMemory(),
-    noiseSigmaM: 0,
-    random: stableRandom,
+    memory,
+    noiseSigmaM,
+    random,
     store,
   });
 
@@ -176,7 +202,9 @@ const statusMessage = async (
 };
 
 export const createTerminalSessionController =
-  (): TerminalSessionController => {
+  (
+    options: TerminalSessionControllerOptions = {},
+  ): TerminalSessionController => {
     const sessionsBySpace = new Map<string, TerminalGroupSession>();
 
     const getSession = (spaceId: string): TerminalGroupSession => {
@@ -185,7 +213,7 @@ export const createTerminalSessionController =
         return existing;
       }
 
-      const created = createSession(spaceId);
+      const created = createSession(spaceId, options);
       sessionsBySpace.set(spaceId, created);
       return created;
     };

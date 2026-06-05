@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Parea Wander</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #111315;
+        --panel: #191d20;
+        --panel-strong: #22272b;
+        --line: #343b40;
+        --text: #f4f0e8;
+        --muted: #b7c1c8;
+        --accent: #58b6a8;
+        --accent-strong: #f3c969;
+        --danger: #f27979;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at top left, rgba(88, 182, 168, 0.18), transparent 34rem),
+          linear-gradient(135deg, #111315 0%, #15191d 48%, #101316 100%);
+        color: var(--text);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        line-height: 1.55;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .page {
+        margin: 0 auto;
+        max-width: 1120px;
+        padding: 36px 24px 56px;
+      }
+
+      .hero {
+        display: grid;
+        gap: 28px;
+        grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+        min-height: 520px;
+        align-items: center;
+      }
+
+      .eyebrow {
+        color: var(--accent);
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        margin: 0 0 12px;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        font-size: clamp(3rem, 7vw, 5.6rem);
+        line-height: 0.93;
+        margin: 0;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+        line-height: 1.2;
+        margin: 0 0 14px;
+      }
+
+      p {
+        color: var(--muted);
+        font-size: 1rem;
+        margin: 0;
+      }
+
+      .lead {
+        font-size: 1.18rem;
+        max-width: 680px;
+        margin-top: 22px;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      .button {
+        align-items: center;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        display: inline-flex;
+        font-weight: 700;
+        min-height: 44px;
+        padding: 0 16px;
+        text-decoration: none;
+      }
+
+      .button.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #061413;
+      }
+
+      .status-grid {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-top: 26px;
+      }
+
+      .status {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(25, 29, 32, 0.78);
+        padding: 14px;
+      }
+
+      .status strong {
+        display: block;
+        font-size: 0.94rem;
+      }
+
+      .status span {
+        color: var(--muted);
+        display: block;
+        font-size: 0.86rem;
+        margin-top: 4px;
+      }
+
+      .device {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+        overflow: hidden;
+      }
+
+      .device-bar {
+        align-items: center;
+        background: var(--panel-strong);
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        gap: 8px;
+        height: 42px;
+        padding: 0 14px;
+      }
+
+      .dot {
+        border-radius: 999px;
+        display: block;
+        height: 10px;
+        width: 10px;
+      }
+
+      .dot.red {
+        background: var(--danger);
+      }
+
+      .dot.yellow {
+        background: var(--accent-strong);
+      }
+
+      .dot.green {
+        background: var(--accent);
+      }
+
+      .chat {
+        display: grid;
+        gap: 14px;
+        padding: 20px;
+      }
+
+      .bubble {
+        border-radius: 8px;
+        max-width: 88%;
+        padding: 12px 14px;
+      }
+
+      .bubble.user {
+        background: #2b5660;
+        justify-self: end;
+      }
+
+      .bubble.bot {
+        background: #242a2e;
+        border: 1px solid var(--line);
+      }
+
+      .bubble strong {
+        color: var(--accent-strong);
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .section {
+        border-top: 1px solid var(--line);
+        padding: 36px 0;
+      }
+
+      .cards {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .card {
+        background: rgba(25, 29, 32, 0.86);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 18px;
+      }
+
+      .card h3 {
+        font-size: 1rem;
+        margin: 0 0 8px;
+      }
+
+      .commands {
+        background: #0b0d0f;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        color: #d9f3ef;
+        font-family:
+          "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        font-size: 0.94rem;
+        margin: 18px 0 0;
+        overflow-x: auto;
+        padding: 16px;
+        white-space: pre;
+      }
+
+      .diagram {
+        background: #f7f6ef;
+        border-radius: 8px;
+        color: #111315;
+        margin-top: 18px;
+        overflow-x: auto;
+        padding: 18px;
+      }
+
+      .footnote {
+        color: var(--muted);
+        font-size: 0.92rem;
+        margin-top: 18px;
+      }
+
+      @media (max-width: 860px) {
+        .hero,
+        .cards,
+        .status-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          min-height: auto;
+          padding-top: 10px;
+        }
+
+        .page {
+          padding: 24px 16px 44px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Agentic AI Hackathon 0605</p>
+          <h1>Parea Wander</h1>
+          <p class="lead">
+            A chat-first group adventure agent that plans a live route, detects
+            when the group leaves the current zone, revises memory, and sends a
+            reroute back into the conversation.
+          </p>
+          <div class="actions">
+            <a
+              class="button primary"
+              href="https://github.com/Airwhale/Parea"
+              >GitHub Repo</a
+            >
+            <a
+              class="button"
+              href="https://github.com/Airwhale/Parea/blob/codex/06-full-loop-butterbase-slack/JUDGES_DEMO.md"
+              >Judge Runbook</a
+            >
+            <a
+              class="button"
+              href="https://github.com/Airwhale/Parea/pull/6"
+              >Integration PR</a
+            >
+          </div>
+          <div class="status-grid">
+            <div class="status">
+              <strong>Interface</strong>
+              <span>Photon/Spectrum terminal or Slack chat</span>
+            </div>
+            <div class="status">
+              <strong>Persistence</strong>
+              <span>Butterbase app tables for sessions and adventures</span>
+            </div>
+            <div class="status">
+              <strong>Memory</strong>
+              <span>XTrace belief seed, contradiction, and read-back</span>
+            </div>
+            <div class="status">
+              <strong>Generation</strong>
+              <span>RocketRide pipeline using live venue candidates</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="device" aria-label="Demo chat transcript">
+          <div class="device-bar">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <div class="chat">
+            <div class="bubble user">I am in</div>
+            <div class="bubble bot">Joined this terminal Wander.</div>
+            <div class="bubble user">we want something mellow</div>
+            <div class="bubble bot">
+              <strong>Your Wander is ready</strong>
+              Presidio route with live venue stops and a map link.
+            </div>
+            <div class="bubble user">we moved to Chinatown</div>
+            <div class="bubble bot">
+              <strong>Reroute ready</strong>
+              New Chinatown foodie route after the group leaves the zone.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>How Judges Communicate With It</h2>
+        <p>
+          Judges type plain text into the Spectrum terminal demo or a configured
+          Slack channel. The same command controller handles both providers.
+        </p>
+        <pre class="commands">npm run judges:demo
+
+I am in
+we want something mellow
+we moved to Chinatown
+where are we?</pre>
+        <p class="footnote">
+          Slash commands also work: /join, /vibe mellow, /move chinatown, and
+          /status.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>Architecture</h2>
+        <p>
+          The engine stays deterministic for safety-sensitive decisions. The LLM
+          writes adventure content, while code checks zone exit and persistence
+          contracts.
+        </p>
+        <div class="diagram">
+          <pre class="mermaid">
+flowchart LR
+  User["Judge or group chat"] --> Spectrum["Photon Spectrum<br/>Terminal or Slack"]
+  Spectrum --> Commands["Command controller"]
+  Commands --> Engine["Parea engine"]
+  Engine --> Geo["Geo module<br/>centroid, noise, zone exit"]
+  Engine --> Store["Store interface"]
+  Store --> Butterbase["Butterbase tables"]
+  Engine --> Memory["Memory interface"]
+  Memory --> XTrace["XTrace beliefs"]
+  Engine --> Generator["Adventure generator"]
+  Generator --> RocketRide["RocketRide pipeline"]
+  Generator --> Venues["Overpass venues"]
+  Engine --> Spectrum
+          </pre>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="cards">
+          <div class="card">
+            <h3>Automated Proof</h3>
+            <p>
+              `npm run full-loop:smoke` proves the Presidio start, XTrace
+              contradiction, RocketRide reroute, and persistence flow.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Live Demo</h3>
+            <p>
+              `npm run judges:demo` lets judges interact with Parea through
+              terminal chat or Slack using normal phrases.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Privacy Rule</h3>
+            <p>
+              Individual GPS points are used transiently. Only the generated
+              adventure zone is persisted.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script type="module">
+      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: "base",
+        themeVariables: {
+          primaryColor: "#e8f6f3",
+          primaryTextColor: "#101316",
+          primaryBorderColor: "#58b6a8",
+          lineColor: "#59717a",
+          secondaryColor: "#fff7dd",
+          tertiaryColor: "#f4f0e8",
+        },
+      });
+    </script>
+  </body>
+</html>
