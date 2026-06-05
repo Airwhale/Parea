@@ -178,10 +178,20 @@
         padding: 20px;
       }
 
+      .chat-messages {
+        display: grid;
+        gap: 12px;
+        max-height: 420px;
+        min-height: 326px;
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+
       .bubble {
         border-radius: 8px;
         max-width: 88%;
         padding: 12px 14px;
+        white-space: pre-wrap;
       }
 
       .bubble.user {
@@ -198,6 +208,60 @@
         color: var(--accent-strong);
         display: block;
         margin-bottom: 4px;
+      }
+
+      .chat-form {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+
+      .chat-form input {
+        background: #0e1113;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        color: var(--text);
+        font: inherit;
+        min-height: 44px;
+        min-width: 0;
+        padding: 0 12px;
+      }
+
+      .chat-form button,
+      .quick-chat button {
+        background: var(--accent);
+        border: 1px solid var(--accent);
+        border-radius: 6px;
+        color: #061413;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 700;
+        min-height: 44px;
+        padding: 0 14px;
+      }
+
+      .chat-form button:disabled {
+        cursor: wait;
+        opacity: 0.68;
+      }
+
+      .quick-chat {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .quick-chat button {
+        background: transparent;
+        border-color: var(--line);
+        color: var(--text);
+        font-size: 0.88rem;
+        min-height: 36px;
+      }
+
+      .chat-status {
+        color: var(--muted);
+        font-size: 0.86rem;
       }
 
       .section {
@@ -267,6 +331,10 @@
         .page {
           padding: 24px 16px 44px;
         }
+
+        .chat-form {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
@@ -319,24 +387,39 @@
           </div>
         </div>
 
-        <div class="device" aria-label="Demo chat transcript">
+        <div class="device" aria-label="Parea web chat demo">
           <div class="device-bar">
             <span class="dot red"></span>
             <span class="dot yellow"></span>
             <span class="dot green"></span>
           </div>
-          <div class="chat">
-            <div class="bubble user">I am in</div>
-            <div class="bubble bot">Joined this terminal Wander.</div>
-            <div class="bubble user">we want something mellow</div>
-            <div class="bubble bot">
-              <strong>Your Wander is ready</strong>
-              Presidio route with live venue stops and a map link.
+          <div class="chat" data-chat-widget>
+            <div class="chat-messages" data-chat-messages></div>
+            <form class="chat-form" data-chat-form>
+              <label for="chat-input" hidden>Message Parea</label>
+              <input
+                id="chat-input"
+                name="message"
+                autocomplete="off"
+                placeholder="Type: we want something mellow"
+                data-chat-input
+              />
+              <button type="submit" data-chat-submit>Send</button>
+            </form>
+            <div class="quick-chat" aria-label="Quick demo messages">
+              <button type="button" data-demo-message="I am in">I am in</button>
+              <button type="button" data-demo-message="we want something mellow">
+                mellow
+              </button>
+              <button type="button" data-demo-message="we moved to Chinatown">
+                moved
+              </button>
+              <button type="button" data-demo-message="where are we?">
+                status
+              </button>
             </div>
-            <div class="bubble user">we moved to Chinatown</div>
-            <div class="bubble bot">
-              <strong>Reroute ready</strong>
-              New Chinatown foodie route after the group leaves the zone.
+            <div class="chat-status" data-chat-status>
+              Connected to Butterbase cloud chat.
             </div>
           </div>
         </div>
@@ -345,8 +428,8 @@
       <section class="section">
         <h2>How Judges Communicate With It</h2>
         <p>
-          Judges type plain text into the Spectrum terminal demo or a configured
-          Slack channel. The same command controller handles both providers.
+          Judges can type directly into the chat window on this page. The
+          terminal and Slack demos use the same message script for local judging.
         </p>
         <pre class="commands">npm run judges:demo
 
@@ -438,6 +521,105 @@ flowchart LR
           tertiaryColor: "#f4f0e8",
         },
       });
+
+      const messagesEl = document.querySelector("[data-chat-messages]");
+      const formEl = document.querySelector("[data-chat-form]");
+      const inputEl = document.querySelector("[data-chat-input]");
+      const submitEl = document.querySelector("[data-chat-submit]");
+      const statusEl = document.querySelector("[data-chat-status]");
+      const sessionKey = "parea-chat-session-id";
+      const sessionId =
+        localStorage.getItem(sessionKey) ??
+        crypto.randomUUID().replaceAll("-", "").slice(0, 18);
+
+      localStorage.setItem(sessionKey, sessionId);
+
+      const endpoint = `/_do/parea-chat/${sessionId}`;
+
+      const appendMessage = (role, text) => {
+        const bubble = document.createElement("div");
+        bubble.className = `bubble ${role}`;
+
+        if (role === "bot") {
+          const strong = document.createElement("strong");
+          strong.textContent = "Parea";
+          bubble.append(strong);
+        }
+
+        bubble.append(document.createTextNode(text));
+        messagesEl.append(bubble);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      };
+
+      const setBusy = (busy) => {
+        submitEl.disabled = busy;
+        inputEl.disabled = busy;
+        statusEl.textContent = busy
+          ? "Parea is thinking..."
+          : "Connected to Butterbase cloud chat.";
+      };
+
+      const sendMessage = async (message) => {
+        const trimmed = message.trim();
+
+        if (trimmed.length === 0) {
+          return;
+        }
+
+        appendMessage("user", trimmed);
+        setBusy(true);
+
+        try {
+          const response = await fetch(endpoint, {
+            body: JSON.stringify({ message: trimmed }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+            method: "POST",
+          });
+
+          if (!response.ok) {
+            throw new Error(`Request failed with ${response.status}`);
+          }
+
+          const payload = await response.json();
+          const replies = Array.isArray(payload.replies)
+            ? payload.replies
+            : ["Parea returned an unexpected response."];
+
+          for (const reply of replies) {
+            appendMessage("bot", String(reply));
+          }
+        } catch (error) {
+          appendMessage(
+            "bot",
+            "The cloud chat is unavailable. The terminal and Slack demos still use the same script.",
+          );
+          statusEl.textContent =
+            error instanceof Error ? error.message : "Unknown chat error.";
+        } finally {
+          setBusy(false);
+          inputEl.focus();
+        }
+      };
+
+      formEl.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const message = inputEl.value;
+        inputEl.value = "";
+        void sendMessage(message);
+      });
+
+      for (const button of document.querySelectorAll("[data-demo-message]")) {
+        button.addEventListener("click", () => {
+          void sendMessage(button.dataset.demoMessage ?? "");
+        });
+      }
+
+      appendMessage(
+        "bot",
+        "Ask me for a Wander. Try: I am in, we want something mellow, we moved to Chinatown, or where are we?",
+      );
     </script>
   </body>
 </html>

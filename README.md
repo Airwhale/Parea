@@ -58,10 +58,20 @@ $env:ROCKETRIDE_URI='http://localhost:61709'
 
 Use [JUDGES_DEMO.md](JUDGES_DEMO.md) as the live runbook. Judges communicate with Parea by typing into a Spectrum chat provider:
 
+- Browser chat on the Butterbase-hosted project page.
 - Terminal provider for the reliable local demo.
 - Slack provider when Slack credentials are ready.
 
 Butterbase-hosted project page: [https://parea-wander.butterbase.dev](https://parea-wander.butterbase.dev)
+
+The hosted page includes a public Butterbase Durable Object chat. Judges can type directly into the page:
+
+```text
+I am in
+we want something mellow
+we moved to Chinatown
+where are we?
+```
 
 Start the judge-facing chat demo:
 

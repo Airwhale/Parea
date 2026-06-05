@@ -8,7 +8,13 @@ Butterbase-hosted project page: [https://parea-wander.butterbase.dev](https://pa
 
 Parea is a chat-first group adventure agent. Judges type messages into a Spectrum chat provider. Parea replies in that same conversation with the current Wander, map link, and reroute.
 
-Use the terminal provider for the most reliable local demo. Use Slack when Slack credentials are configured.
+Use the Butterbase-hosted page for the quickest judge demo. Use the terminal provider for local backup. Use Slack when Slack credentials are configured.
+
+The hosted page includes a public Butterbase Durable Object chat endpoint:
+
+```text
+https://parea-wander.butterbase.dev/_do/parea-chat/<session-id>
+```
 
 ## Preflight
 
@@ -56,6 +62,34 @@ Expected result:
 - One initial Presidio Wander delivery.
 - One Chinatown reroute delivery.
 - A successful JSON log entry for `full_loop_smoke`.
+
+## Live Web Demo
+
+Open the hosted page:
+
+```text
+https://parea-wander.butterbase.dev
+```
+
+Use the chat panel on the page. Either click the quick demo buttons or type these messages:
+
+```text
+I am in
+we want something mellow
+we moved to Chinatown
+where are we?
+```
+
+Expected flow:
+
+1. `I am in` adds the judge as a group member.
+2. `we want something mellow` starts a mellow Presidio Wander.
+3. Parea replies with a generated adventure and a map link.
+4. `we moved to Chinatown` simulates a location update outside the active zone.
+5. Parea replies with a Chinatown reroute.
+6. `where are we?` confirms the active reroute adventure.
+
+The browser chat is intentionally deterministic so judges can interact with it without local credentials.
 
 ## Live Terminal Demo
 
@@ -132,7 +166,8 @@ Use this short narration while running the demo:
 
 ## Troubleshooting
 
-- If the chat does not start, run `npm run judges:demo -- --help` to verify the command surface.
+- If the web chat does not reply, refresh the page and retry the quick demo buttons.
+- If the terminal chat does not start, run `npm run judges:demo -- --help` to verify the command surface.
 - If RocketRide fails to connect, check the port shown by the RocketRide extension and update `ROCKETRIDE_URI`.
 - If Slack does not receive messages, fall back to the terminal provider and keep the same message script.
 - If live venue lookup is slow, set `VENUE_SOURCE=stub` for a deterministic local fallback.
