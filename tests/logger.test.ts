@@ -57,4 +57,30 @@ describe("createLogger", () => {
       phase: "boot",
     });
   });
+
+  it("does not throw when a log event is invalid", () => {
+    const messages: string[] = [];
+    const logger = createLogger({
+      runId: "run_test",
+      sink: {
+        debug: (message) => messages.push(message),
+        error: (message) => messages.push(message),
+        info: (message) => messages.push(message),
+        warn: (message) => messages.push(message),
+      },
+    });
+
+    expect(() => {
+      logger.info({ phase: "", status: "info" });
+    }).not.toThrow();
+
+    expect(messages).toHaveLength(1);
+    expect(JSON.parse(messages[0] ?? "{}")).toMatchObject({
+      level: "error",
+      message: expect.stringContaining("Log validation failed"),
+      phase: "logger",
+      runId: "run_test",
+      status: "failed",
+    });
+  });
 });

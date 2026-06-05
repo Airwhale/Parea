@@ -1,11 +1,8 @@
 import "dotenv/config";
 
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import { z } from "zod";
 
-export const APP_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+export const APP_ROOT = process.cwd();
 
 const emptyToUndefined = (value: unknown): unknown => {
   if (value === "") {

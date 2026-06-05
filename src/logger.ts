@@ -54,10 +54,24 @@ export const createLogger = ({
       return;
     }
 
-    const parsed = LogEventSchema.parse({ ...event, runId });
+    const parsed = LogEventSchema.safeParse({ ...event, runId });
+    if (!parsed.success) {
+      sink.error(
+        JSON.stringify({
+          level: "error",
+          message: `Log validation failed: ${parsed.error.message}`,
+          phase: "logger",
+          runId,
+          status: "failed",
+          timestamp: new Date().toISOString(),
+        }),
+      );
+      return;
+    }
+
     sink[eventLevel](
       JSON.stringify({
-        ...parsed,
+        ...parsed.data,
         level: eventLevel,
         timestamp: new Date().toISOString(),
       }),

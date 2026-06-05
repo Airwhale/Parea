@@ -1,3 +1,6 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { APP_ROOT, ConfigError, loadConfig } from "../src/config.js";
@@ -13,7 +16,7 @@ describe("loadConfig", () => {
       rocketrideUri: "http://localhost:5565",
       spectrumProvider: "terminal",
     });
-    expect(APP_ROOT).toEqual(expect.stringContaining("Par"));
+    expect(existsSync(join(APP_ROOT, "package.json"))).toBe(true);
   });
 
   it("parses explicit environment values", () => {
