@@ -22,8 +22,9 @@ npm run dev
 
 Useful scripts:
 
-- `npm run dev` starts the typed config loader and runs the canned Presidio-to-Chinatown stub loop.
+- `npm run dev` starts the typed config loader and runs the canned Presidio-to-Chinatown loop, using XTrace memory when credentials are set and the stub otherwise.
 - `npm run dev:terminal` starts the Spectrum terminal provider for manual chat testing.
+- `npm run xtrace:smoke` runs a live XTrace seed, contradiction, and read-back smoke when `XTRACE_API_KEY` and `XTRACE_ORG_ID` are set.
 - `npm run lint` runs ESLint.
 - `npm run typecheck` runs TypeScript without emitting files.
 - `npm run test` runs Vitest.

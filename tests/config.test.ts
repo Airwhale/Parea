@@ -34,6 +34,7 @@ describe("loadConfig", () => {
     expect(config.port).toBe(4123);
     expect(config.xtrace).toEqual({
       apiKey: "xtk_example",
+      apiUrl: "https://api.production.xtrace.ai",
       orgId: "org_example",
     });
   });
@@ -59,6 +60,7 @@ describe("loadConfig", () => {
       rocketrideUri: "http://localhost:5565",
       spectrumProvider: "terminal",
     });
+    expect(config.xtrace.apiUrl).toBe("https://api.production.xtrace.ai");
     expect(config.butterbase.appId).toBeUndefined();
   });
 

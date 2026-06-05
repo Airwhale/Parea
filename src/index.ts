@@ -3,16 +3,20 @@ import "dotenv/config";
 import { ConfigError, loadConfig } from "./config.js";
 import { createLogger } from "./logger.js";
 import { runStubDemo } from "./stubDemo.js";
+import { createConfiguredMemory } from "./xtraceMemory.js";
 
 const main = async (): Promise<void> => {
   const config = loadConfig();
   const logger = createLogger({ level: config.logLevel });
+  const xtraceConfigured =
+    config.xtrace.apiKey !== undefined && config.xtrace.orgId !== undefined;
 
   logger.info({
     fields: {
       appEnv: config.appEnv,
       port: config.port,
       spectrumProvider: config.spectrumProvider,
+      xtraceConfigured,
     },
     message: "Parea Wander bootstrap ready.",
     phase: "boot",
@@ -20,7 +24,10 @@ const main = async (): Promise<void> => {
     status: "succeeded",
   });
 
-  const result = await runStubDemo({ printToConsole: true });
+  const result = await runStubDemo({
+    memory: createConfiguredMemory(config.xtrace),
+    printToConsole: true,
+  });
   logger.info({
     fields: {
       rerouted: result.rerouted,
