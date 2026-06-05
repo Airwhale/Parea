@@ -58,27 +58,41 @@ export const runSpectrumTerminal = async (): Promise<void> => {
   });
 
   for await (const [space, message] of app.messages) {
-    const text = extractTextContent(message);
-    const userId = message.sender?.id ?? "terminal_user";
+    try {
+      const text = extractTextContent(message);
+      const userId = message.sender?.id ?? "terminal_user";
 
-    await space.responding(async () => {
-      if (text === undefined) {
-        await message.reply(
-          "Parea terminal currently accepts text commands only. Use help for commands.",
-        );
-        return;
-      }
+      await space.responding(async () => {
+        if (text === undefined) {
+          await message.reply(
+            "Parea terminal currently accepts text commands only. Use help for commands.",
+          );
+          return;
+        }
 
-      const replies = await controller.handleText({
-        spaceId: space.id,
-        text,
-        userId,
+        const replies = await controller.handleText({
+          spaceId: space.id,
+          text,
+          userId,
+        });
+
+        for (const reply of replies) {
+          await space.send(formatTerminalOutMessage(reply));
+        }
       });
-
-      for (const reply of replies) {
-        await space.send(formatTerminalOutMessage(reply));
-      }
-    });
+    } catch (error) {
+      logger.error({
+        fields: {
+          error: error instanceof Error ? error.message : String(error),
+          messageId: message.id,
+          spaceId: space.id,
+        },
+        message: "Failed to process Spectrum terminal message.",
+        phase: "spectrum_terminal_message",
+        schemaId: "app.spectrum_terminal.message.v1",
+        status: "failed",
+      });
+    }
   }
 };
 
