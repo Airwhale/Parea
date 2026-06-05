@@ -14,6 +14,12 @@ export const ZoneSchema = z.object({
 });
 export type Zone = z.infer<typeof ZoneSchema>;
 
+export const CoordinateSchema = z.object({
+  lat: LatitudeSchema,
+  lng: LongitudeSchema,
+});
+export type Coordinate = z.infer<typeof CoordinateSchema>;
+
 export const VenueSchema = z.object({
   category: NonEmptyStringSchema,
   lat: LatitudeSchema,
@@ -70,6 +76,16 @@ export const BeliefRefSchema = z.object({
 });
 export type BeliefRef = z.infer<typeof BeliefRefSchema>;
 
+export const BeliefSchema = z.object({
+  confidence: z.number().min(0).max(1),
+  groupId: NonEmptyStringSchema,
+  id: NonEmptyStringSchema,
+  status: z.enum(["active", "revised", "retracted"]),
+  summary: NonEmptyStringSchema,
+  vibe: VibeSchema.optional(),
+});
+export type Belief = z.infer<typeof BeliefSchema>;
+
 export const LocationUpdateSchema = z.object({
   groupId: NonEmptyStringSchema,
   lat: LatitudeSchema,
@@ -84,3 +100,10 @@ export const OutMessageSchema = z.object({
   title: NonEmptyStringSchema.optional(),
 });
 export type OutMessage = z.infer<typeof OutMessageSchema>;
+
+export const MemberLocationSchema = z.object({
+  lat: LatitudeSchema,
+  lng: LongitudeSchema,
+  userId: NonEmptyStringSchema,
+});
+export type MemberLocation = z.infer<typeof MemberLocationSchema>;

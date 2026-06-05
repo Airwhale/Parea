@@ -2,8 +2,9 @@ import "dotenv/config";
 
 import { ConfigError, loadConfig } from "./config.js";
 import { createLogger } from "./logger.js";
+import { runStubDemo } from "./stubDemo.js";
 
-const main = (): void => {
+const main = async (): Promise<void> => {
   const config = loadConfig();
   const logger = createLogger({ level: config.logLevel });
 
@@ -18,10 +19,21 @@ const main = (): void => {
     schemaId: "app.config.v1",
     status: "succeeded",
   });
+
+  const result = await runStubDemo({ printToConsole: true });
+  logger.info({
+    fields: {
+      rerouted: result.rerouted,
+    },
+    message: "Stub Wander loop completed.",
+    phase: "stub_demo",
+    schemaId: "app.stub_demo.v1",
+    status: "succeeded",
+  });
 };
 
 try {
-  main();
+  await main();
 } catch (error) {
   if (error instanceof ConfigError) {
     console.error(
