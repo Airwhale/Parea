@@ -54,6 +54,17 @@ export const AdventureSchema = z.object({
 );
 export type Adventure = z.infer<typeof AdventureSchema>;
 
+export const AdventureGenerateInputSchema = z.object({
+  belief: NonEmptyStringSchema.optional(),
+  groupId: NonEmptyStringSchema,
+  lat: LatitudeSchema,
+  lng: LongitudeSchema,
+  vibe: VibeSchema,
+});
+export type AdventureGenerateInput = z.infer<
+  typeof AdventureGenerateInputSchema
+>;
+
 export const GroupSchema = z.object({
   createdAt: z.string().datetime(),
   id: NonEmptyStringSchema,

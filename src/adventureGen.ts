@@ -1,20 +1,29 @@
-import type { Adventure, Venue, Vibe } from "./schemas.js";
+import { AdventureGenerateInputSchema, AdventureSchema } from "./schemas.js";
+
+import type { Adventure, AdventureGenerateInput, Venue, Vibe } from "./schemas.js";
 import type { VenueSource } from "./venues.js";
 import { VIBE_QUERIES } from "./vibes.js";
-
-export type AdventureGenerateInput = {
-  belief?: string;
-  groupId: string;
-  lat: number;
-  lng: number;
-  vibe: Vibe;
-};
 
 export type AdventureGen = {
   generate: (input: AdventureGenerateInput) => Promise<Adventure>;
 };
 
-const titleForVibe = (vibe: Vibe): string => {
+const DEFAULT_SEARCH_RADII_M = [900, 1_500, 2_500] as const;
+const DEFAULT_ZONE_RADIUS_M = 350;
+
+const VIBE_FALLBACKS: Record<Vibe, readonly Vibe[]> = {
+  active: ["cultural", "foodie", "mellow"],
+  cultural: ["foodie", "mellow", "active"],
+  foodie: ["cultural", "mellow", "active"],
+  mellow: ["cultural", "foodie", "active"],
+};
+
+export type VenueBackedAdventureGenOptions = {
+  searchRadiiM?: readonly number[];
+  zoneRadiusM?: number;
+};
+
+export const titleForVibe = (vibe: Vibe): string => {
   const titles: Record<Vibe, string> = {
     active: "Bay Motion Loop",
     cultural: "North Beach Story Walk",
@@ -25,7 +34,7 @@ const titleForVibe = (vibe: Vibe): string => {
   return titles[vibe];
 };
 
-const promptForBeat = (vibe: Vibe, order: 1 | 2 | 3): string => {
+export const promptForBeat = (vibe: Vibe, order: 1 | 2 | 3): string => {
   const prompts: Record<Vibe, Record<1 | 2 | 3, string>> = {
     active: {
       1: "Start with a quick pace check.",
@@ -52,46 +61,104 @@ const promptForBeat = (vibe: Vibe, order: 1 | 2 | 3): string => {
   return prompts[vibe][order];
 };
 
-export const createStubAdventureGen = (
-  venueSource: VenueSource,
-): AdventureGen => ({
-  generate: async ({ groupId, lat, lng, vibe }) => {
-    const venues = await venueSource.search({
-      categories: VIBE_QUERIES[vibe],
-      lat,
-      lng,
-      openNow: true,
-      radiusM: 900,
-    });
-    const selected = venues.slice(0, 3);
+const orderedVibes = (vibe: Vibe): readonly Vibe[] => [
+  vibe,
+  ...VIBE_FALLBACKS[vibe],
+];
 
-    if (selected.length < 3) {
-      throw new Error(
-        `Stub venue source returned ${selected.length} venues, but 3 are required.`,
-      );
+const findThreeVenues = async ({
+  lat,
+  lng,
+  searchRadiiM,
+  venueSource,
+  vibe,
+}: AdventureGenerateInput & {
+  searchRadiiM: readonly number[];
+  venueSource: VenueSource;
+}): Promise<{ selectedVibe: Vibe; venues: readonly [Venue, Venue, Venue] }> => {
+  for (const candidateVibe of orderedVibes(vibe)) {
+    for (const radiusM of searchRadiiM) {
+      const venues = await venueSource.search({
+        categories: VIBE_QUERIES[candidateVibe],
+        lat,
+        lng,
+        openNow: true,
+        radiusM,
+      });
+      const selected = venues.slice(0, 3);
+
+      if (selected.length === 3) {
+        return {
+          selectedVibe: candidateVibe,
+          venues: selected as [Venue, Venue, Venue],
+        };
+      }
     }
+  }
 
-    const [firstVenue, secondVenue, thirdVenue] = selected as [
-      Venue,
-      Venue,
-      Venue,
-    ];
+  throw new Error(
+    `Could not find 3 venues near ${lat},${lng} for vibe ${vibe}.`,
+  );
+};
 
-    return {
-      beats: [
-        { order: 1, prompt: promptForBeat(vibe, 1), venue: firstVenue },
-        { order: 2, prompt: promptForBeat(vibe, 2), venue: secondVenue },
-        { order: 3, prompt: promptForBeat(vibe, 3), venue: thirdVenue },
-      ],
-      groupId,
-      id: `adv_${vibe}_${groupId}`,
-      title: titleForVibe(vibe),
-      vibe,
-      zone: {
-        centerLat: lat,
-        centerLng: lng,
-        radiusM: 350,
-      },
-    };
+export const buildAdventureFromVenues = ({
+  groupId,
+  lat,
+  lng,
+  venueTuple,
+  vibe,
+  zoneRadiusM = DEFAULT_ZONE_RADIUS_M,
+}: {
+  groupId: string;
+  lat: number;
+  lng: number;
+  venueTuple: readonly [Venue, Venue, Venue];
+  vibe: Vibe;
+  zoneRadiusM?: number;
+}): Adventure =>
+  AdventureSchema.parse({
+    beats: [
+      { order: 1, prompt: promptForBeat(vibe, 1), venue: venueTuple[0] },
+      { order: 2, prompt: promptForBeat(vibe, 2), venue: venueTuple[1] },
+      { order: 3, prompt: promptForBeat(vibe, 3), venue: venueTuple[2] },
+    ],
+    groupId,
+    id: `adv_${vibe}_${groupId}`,
+    title: titleForVibe(vibe),
+    vibe,
+    zone: {
+      centerLat: lat,
+      centerLng: lng,
+      radiusM: zoneRadiusM,
+    },
+  });
+
+export const createVenueBackedAdventureGen = (
+  venueSource: VenueSource,
+  {
+    searchRadiiM = DEFAULT_SEARCH_RADII_M,
+    zoneRadiusM = DEFAULT_ZONE_RADIUS_M,
+  }: VenueBackedAdventureGenOptions = {},
+): AdventureGen => ({
+  generate: async (rawInput) => {
+    const input = AdventureGenerateInputSchema.parse(rawInput);
+    const { selectedVibe, venues } = await findThreeVenues({
+      ...input,
+      searchRadiiM,
+      venueSource,
+    });
+
+    return buildAdventureFromVenues({
+      groupId: input.groupId,
+      lat: input.lat,
+      lng: input.lng,
+      venueTuple: venues,
+      vibe: selectedVibe,
+      zoneRadiusM,
+    });
   },
 });
+
+export const createStubAdventureGen = (
+  venueSource: VenueSource,
+): AdventureGen => createVenueBackedAdventureGen(venueSource, { searchRadiiM: [900] });

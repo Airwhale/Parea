@@ -1,3 +1,6 @@
+import { createOverpassVenueSource } from "./overpassVenues.js";
+
+import type { AppConfig } from "./config.js";
 import type { Venue } from "./schemas.js";
 
 export type VenueSearch = {
@@ -121,3 +124,16 @@ export const createStubVenueSource = (
         (!openNow || venue.openNow === true),
     ),
 });
+
+export const createConfiguredVenueSource = (
+  config: AppConfig["venues"],
+): VenueSource => {
+  switch (config.source) {
+    case "overpass":
+      return createOverpassVenueSource({
+        endpointUrl: config.overpassApiUrl,
+      });
+    case "stub":
+      return createStubVenueSource();
+  }
+};

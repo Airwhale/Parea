@@ -2,7 +2,10 @@ import "dotenv/config";
 
 import { ConfigError, loadConfig } from "./config.js";
 import { createLogger } from "./logger.js";
+import { createVenueBackedAdventureGen } from "./adventureGen.js";
+import { createConfiguredAdventureGen } from "./rocketrideAdventureGen.js";
 import { runStubDemo } from "./stubDemo.js";
+import { createConfiguredVenueSource } from "./venues.js";
 import { createConfiguredMemory } from "./xtraceMemory.js";
 
 const main = async (): Promise<void> => {
@@ -10,12 +13,22 @@ const main = async (): Promise<void> => {
   const logger = createLogger({ level: config.logLevel });
   const xtraceConfigured =
     config.xtrace.apiKey !== undefined && config.xtrace.orgId !== undefined;
+  const venueSource = createConfiguredVenueSource(config.venues);
+  const adventureGen =
+    createConfiguredAdventureGen({
+      rocketride: config.rocketride,
+      venueSource,
+    }) ?? createVenueBackedAdventureGen(venueSource);
 
   logger.info({
     fields: {
       appEnv: config.appEnv,
       port: config.port,
+      rocketrideConfigured:
+        config.rocketride.apiKey !== undefined &&
+        config.rocketride.adventurePipelinePath !== undefined,
       spectrumProvider: config.spectrumProvider,
+      venueSource: config.venues.source,
       xtraceConfigured,
     },
     message: "Parea Wander bootstrap ready.",
@@ -25,6 +38,7 @@ const main = async (): Promise<void> => {
   });
 
   const result = await runStubDemo({
+    adventureGen,
     memory: createConfiguredMemory(config.xtrace),
     printToConsole: true,
   });

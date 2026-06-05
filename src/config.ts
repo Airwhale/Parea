@@ -42,14 +42,28 @@ export const ConfigSchema = z.object({
     z.enum(["debug", "info", "warn", "error", "silent"]).default("info"),
   ),
   port: PortSchema,
-  rocketrideUri: z.preprocess(
-    emptyToUndefined,
-    z.string().url().default("http://localhost:5565"),
-  ),
+  rocketride: z.object({
+    adventurePipelinePath: OptionalStringSchema,
+    apiKey: OptionalStringSchema,
+    uri: z.preprocess(
+      emptyToUndefined,
+      z.string().url().default("http://localhost:5565"),
+    ),
+  }),
   spectrumProvider: z.preprocess(
     emptyToUndefined,
     z.enum(["terminal", "slack", "imessage"]).default("terminal"),
   ),
+  venues: z.object({
+    overpassApiUrl: z.preprocess(
+      emptyToUndefined,
+      z.string().url().default("https://overpass-api.de/api/interpreter"),
+    ),
+    source: z.preprocess(
+      emptyToUndefined,
+      z.enum(["stub", "overpass"]).default("stub"),
+    ),
+  }),
   xtrace: z.object({
     apiKey: OptionalStringSchema,
     apiUrl: z.preprocess(
@@ -89,8 +103,16 @@ export const loadConfig = (
     },
     logLevel: env.LOG_LEVEL,
     port: env.PORT,
-    rocketrideUri: env.ROCKETRIDE_URI,
+    rocketride: {
+      adventurePipelinePath: env.ROCKETRIDE_ADVENTURE_PIPELINE,
+      apiKey: env.ROCKETRIDE_APIKEY,
+      uri: env.ROCKETRIDE_URI,
+    },
     spectrumProvider: env.SPECTRUM_PROVIDER,
+    venues: {
+      overpassApiUrl: env.OVERPASS_API_URL,
+      source: env.VENUE_SOURCE,
+    },
     xtrace: {
       apiKey: env.XTRACE_API_KEY,
       apiUrl: env.XTRACE_API_URL,
