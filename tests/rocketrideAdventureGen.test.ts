@@ -95,6 +95,23 @@ describe("parseRocketRideAdventureResult", () => {
     expect(parseRocketRideAdventureResult(result, input)).toEqual(adventure);
   });
 
+  it("skips malformed adventure candidates before using a valid one", () => {
+    const result: PIPELINE_RESULT = {
+      answers: [
+        JSON.stringify({
+          ...adventure,
+          beats: adventure.beats.slice(0, 2),
+        }),
+        JSON.stringify(adventure),
+      ],
+      name: "result",
+      objectId: "object",
+      path: "",
+    };
+
+    expect(parseRocketRideAdventureResult(result, input)).toEqual(adventure);
+  });
+
   it("rejects adventures for the wrong group", () => {
     const result: PIPELINE_RESULT = {
       answers: [

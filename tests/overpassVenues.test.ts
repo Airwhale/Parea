@@ -37,6 +37,16 @@ describe("createOverpassVenueSource", () => {
               },
               {
                 id: 3,
+                lat: 999,
+                lon: -122.407,
+                tags: {
+                  cuisine: "dim_sum",
+                  name: "Malformed Venue",
+                },
+                type: "node",
+              },
+              {
+                id: 4,
                 lat: 37.796,
                 lon: -122.408,
                 tags: {

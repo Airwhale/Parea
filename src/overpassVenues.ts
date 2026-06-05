@@ -245,12 +245,14 @@ const venueFromElement = (
     return undefined;
   }
 
-  return VenueSchema.parse({
+  const parsed = VenueSchema.safeParse({
     category,
     lat: coordinates.lat,
     lng: coordinates.lng,
     name,
   });
+
+  return parsed.success ? parsed.data : undefined;
 };
 
 const dedupeVenues = (venues: readonly Venue[]): readonly Venue[] => {

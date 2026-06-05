@@ -232,7 +232,12 @@ const parseAdventureCandidate = (
     return undefined;
   }
 
-  const adventure = AdventureSchema.parse(loose.data);
+  const adventureResult = AdventureSchema.safeParse(loose.data);
+  if (!adventureResult.success) {
+    return undefined;
+  }
+
+  const adventure = adventureResult.data;
   if (adventure.groupId !== input.groupId) {
     throw new Error(
       `RocketRide returned adventure for ${adventure.groupId}, expected ${input.groupId}.`,
