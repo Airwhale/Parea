@@ -61,20 +61,28 @@ const VIBES = [
   "cultural",
   "active",
 ] as const satisfies readonly Vibe[];
+const VIBE_REGEXES = new Map<Vibe, RegExp>(
+  VIBES.map((vibe) => [vibe, new RegExp(`\\b${vibe}\\b`, "i")]),
+);
 
 const conversationIdForGroup = (groupId: string): string =>
   `parea_wander_${groupId}`;
 
-const clampConfidence = (value: number | null): number => {
-  if (value === null || Number.isNaN(value)) {
+const clampConfidence = (value: number | null | undefined): number => {
+  if (value === null || value === undefined || Number.isNaN(value)) {
     return 0.5;
   }
 
   return Math.max(0, Math.min(1, value));
 };
 
-const extractVibe = (text: string): Vibe | undefined =>
-  VIBES.find((vibe) => new RegExp(`\\b${vibe}\\b`, "i").test(text));
+const extractVibe = (text: string | null | undefined): Vibe | undefined => {
+  if (text === null || text === undefined) {
+    return undefined;
+  }
+
+  return VIBES.find((vibe) => VIBE_REGEXES.get(vibe)?.test(text));
+};
 
 const jobMemoryRefs = (job: IngestJob) => [
   ...(job.result?.memories_updated ?? []),
@@ -130,6 +138,7 @@ const xtraceStatusToBeliefStatus = (
       return "revised";
     case "active":
     case null:
+    default:
       return "active";
   }
 };
@@ -222,7 +231,7 @@ export const createXTraceMemory = (options: XTraceMemoryOptions): Memory => {
         user_id: groupId,
       });
 
-      return result.data
+      return (result.data ?? [])
         .filter((record) => record.type === "fact")
         .sort(
           (left, right) => createdAtTimestamp(left) - createdAtTimestamp(right),

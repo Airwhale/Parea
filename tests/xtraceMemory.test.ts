@@ -17,8 +17,9 @@ const timestamp = "2026-06-05T19:00:00.000Z";
 
 type FakeClientOptions = {
   ingestJobs?: IngestJob[];
+  omitSearchData?: boolean;
   pollJobs?: IngestJob[];
-  searchData?: XTraceMemoryRecord[];
+  searchData?: SearchListEnvelope["data"];
 };
 
 type FakeXTraceMemoryClient = XTraceMemoryClient & {
@@ -66,17 +67,15 @@ const createJob = ({
   updated_at: timestamp,
 });
 
-const factMemory = ({
-  id,
-  score = 0.88,
-  status = "active",
-  text,
-}: {
+const factMemory = (input: {
   id: string;
-  score?: number | null;
+  score?: number | null | undefined;
   status?: MemoryStatus | null;
   text: string;
-}): XTraceMemoryRecord => ({
+}): XTraceMemoryRecord => {
+  const score = "score" in input ? input.score : 0.88;
+
+  return {
   agent_id: "parea-wander",
   app_id: "parea",
   categories: [],
@@ -89,21 +88,23 @@ const factMemory = ({
     fact_type: "belief",
     source_event_ids: [],
     source_role: "user",
-    status,
+    status: input.status ?? "active",
     supersedes: null,
   },
   group_ids: [],
-  id,
+  id: input.id,
   object: "memory",
-  score,
-  text,
+  score: score ?? null,
+  text: input.text,
   type: "fact",
   updated_at: timestamp,
   user_id: "group_test",
-});
+  };
+};
 
 const createFakeClient = ({
   ingestJobs = [],
+  omitSearchData = false,
   pollJobs = [],
   searchData = [],
 }: FakeClientOptions = {}): FakeXTraceMemoryClient => {
@@ -129,12 +130,18 @@ const createFakeClient = ({
       },
       search: async (body): Promise<SearchListEnvelope> => {
         searchCalls.push(body);
-        return {
+        const envelope: SearchListEnvelope = {
           data: searchData,
           has_more: false,
           next_cursor: null,
           object: "list",
         };
+
+        if (omitSearchData) {
+          delete (envelope as Partial<SearchListEnvelope>).data;
+        }
+
+        return envelope;
       },
     },
     pollCalls,
@@ -277,6 +284,47 @@ describe("createXTraceMemory", () => {
         mode: "retrieve",
         query: "current active Parea Wander adventure-fit belief",
         user_id: "group_test",
+      },
+    ]);
+  });
+
+  it("defaults missing scores and empty search payloads safely", async () => {
+    const emptyClient = createFakeClient({
+      omitSearchData: true,
+    });
+    const emptyMemory = createXTraceMemory({
+      apiKey: "xtk_test",
+      client: emptyClient,
+      orgId: "org_test",
+    });
+
+    await expect(emptyMemory.current("group_test")).resolves.toEqual([]);
+
+    const missingScoreRecord = factMemory({
+      id: "mem_without_score",
+      text: "Group group_test now fits a foodie reroute.",
+    });
+    delete (missingScoreRecord as Partial<XTraceMemoryRecord>).score;
+
+    const missingScoreClient = createFakeClient({
+      searchData: [
+        missingScoreRecord,
+      ],
+    });
+    const missingScoreMemory = createXTraceMemory({
+      apiKey: "xtk_test",
+      client: missingScoreClient,
+      orgId: "org_test",
+    });
+
+    await expect(missingScoreMemory.current("group_test")).resolves.toEqual([
+      {
+        confidence: 0.5,
+        groupId: "group_test",
+        id: "mem_without_score",
+        status: "active",
+        summary: "Group group_test now fits a foodie reroute.",
+        vibe: "foodie",
       },
     ]);
   });
