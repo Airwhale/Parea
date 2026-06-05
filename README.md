@@ -2,7 +2,7 @@
 
 Parea Wander is a TypeScript/Node hackathon demo for a group-adventure agent that starts in a messaging app, computes a privacy-safe group meeting point, generates an adventure from live venue data, and reroutes when the group leaves the current zone.
 
-This repository is being built in small PRs. The first branch establishes project hygiene and typed boundaries only; sponsor integrations and the runnable adventure loop land in follow-up branches.
+This repository is being built in small PRs. The current code runs a fully stubbed Wander loop; sponsor SDK integrations land in follow-up branches.
 
 ## Local Development
 
@@ -22,7 +22,7 @@ npm run dev
 
 Useful scripts:
 
-- `npm run dev` starts the bootstrap entry point with typed config loading.
+- `npm run dev` starts the typed config loader and runs the canned Presidio-to-Chinatown stub loop.
 - `npm run lint` runs ESLint.
 - `npm run typecheck` runs TypeScript without emitting files.
 - `npm run test` runs Vitest.
