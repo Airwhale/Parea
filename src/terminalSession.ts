@@ -40,13 +40,13 @@ const terminalMessage = (body: string): OutMessage =>
 
 export const TERMINAL_HELP_MESSAGE = [
   "Parea terminal commands:",
-  "start - choose a vibe for a new Wander",
-  "start mellow - start immediately with a vibe",
-  "join - add yourself to the terminal group",
-  "vibe mellow - choose mellow, foodie, cultural, or active",
-  "move chinatown - simulate leaving the current zone",
-  "move presidio - simulate staying near the starting zone",
-  "status - show the current terminal session state",
+  "/start - choose a vibe for a new Wander",
+  "/start mellow - start immediately with a vibe",
+  "/join - add yourself to the terminal group",
+  "/vibe mellow - choose mellow, foodie, cultural, or active",
+  "/move chinatown - simulate leaving the current zone",
+  "/move presidio - simulate staying near the starting zone",
+  "/status - show the current terminal session state",
 ].join("\n");
 
 const targetToDemoLocation = (target: MoveTarget): "chinatown" | "presidio" => {

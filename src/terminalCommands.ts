@@ -89,8 +89,9 @@ const moveCommand = (argument: string | undefined): TerminalCommand => {
 
 export const parseTerminalCommand = (text: string): TerminalCommand => {
   const [rawKeyword, rawArgument] = text.trim().toLowerCase().split(/\s+/);
+  const keyword = rawKeyword?.replace(/^\//, "");
 
-  switch (rawKeyword) {
+  switch (keyword) {
     case "help":
       return { kind: "help" };
     case "join":

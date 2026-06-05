@@ -17,12 +17,12 @@ import {
 import type { Message, PlatformProviderConfig } from "spectrum-ts";
 
 const TERMINAL_COMMANDS: { description: string; name: string }[] = [
-  { description: "Show Parea terminal commands.", name: "help" },
-  { description: "Choose a vibe for a new Wander.", name: "start" },
-  { description: "Join the terminal group.", name: "join" },
-  { description: "Pick mellow, foodie, cultural, or active.", name: "vibe" },
-  { description: "Simulate a location update.", name: "move" },
-  { description: "Show the current session state.", name: "status" },
+  { description: "Show Parea terminal commands.", name: "/help" },
+  { description: "Choose a vibe for a new Wander.", name: "/start" },
+  { description: "Join the terminal group.", name: "/join" },
+  { description: "Pick mellow, foodie, cultural, or active.", name: "/vibe" },
+  { description: "Simulate a location update.", name: "/move" },
+  { description: "Show the current session state.", name: "/status" },
 ];
 
 const extractTextContent = (message: Message): string | undefined => {

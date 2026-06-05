@@ -17,6 +17,10 @@ describe("terminal commands", () => {
       kind: "start",
       vibe: "foodie",
     });
+    expect(parseTerminalCommand("/vibe cultural")).toEqual({
+      kind: "start",
+      vibe: "cultural",
+    });
   });
 
   it("parses movement simulation commands", () => {

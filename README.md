@@ -36,7 +36,7 @@ Manual Spectrum terminal smoke:
 npm run dev:terminal
 ```
 
-In the terminal chat, use `start`, `join`, `vibe mellow`, `move presidio`, `move chinatown`, and `status`. A successful smoke produces the initial Presidio Stroll and then a Chinatown Snack Quest reroute after `move chinatown`.
+In the terminal chat, use `/start`, `/join`, `/vibe mellow`, `/move presidio`, `/move chinatown`, and `/status`. Plain text commands without the slash also work. A successful smoke produces the initial Presidio Stroll and then a Chinatown Snack Quest reroute after `/move chinatown`.
 
 ## Branch Plan
 
